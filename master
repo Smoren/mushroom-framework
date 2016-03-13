@@ -1,0 +1,116 @@
+#!/usr/bin/php
+<?php
+
+use \MushroomFramework\Database\Migration;
+use \MushroomFramework\Main\App;
+
+require('core/init.php');
+// App::gi()->init();
+// define('STDIN', fopen('php://stdin', 'r'));
+
+$commands = array(
+	'migrate' => array(
+		'install' => 'install migrations',
+		'make' => 'make migration',
+		'roll' => 'roll migrations',
+		'rollback' => 'rollback migrations',
+		'reset' => 'reset migrations',
+	),
+	'controller' => array(
+		'make' => 'make controller',
+	),
+	'model' => array(
+		'make' => 'make model',
+	),
+);
+
+$command = isset($argv[1]) ? $argv[1] : false;
+$param = isset($argv[2]) ? $argv[2] : false;
+for($i=0; $i<3; $i++) { 
+	array_shift($argv);
+}
+$args = $argv;
+
+if(!$command) {
+	echo 'allowable commands: '.implode(', ', array_keys($commands))."\n";
+} elseif(isset($commands[$command])) {
+	$className = 'Master'.ucfirst($command);
+	if(!$param) {
+		echo 'allowable params: '.implode(', ', array_keys($commands[$command]))."\n";
+	} elseif(isset($commands[$command][$param])) {
+		$methodName = $param;
+		call_user_func_array(array($className, $methodName), $args);
+	} else {
+		echo "Error: bad param '{$param}'\n";
+	}
+} else {
+	echo "Error: command '{$command}' not found\n";
+}
+
+// fclose(STDIN);
+
+class MasterMigrate {
+	public static function install() {
+		try {
+			Migration::install();
+		} catch(Exception $e) {
+			echo "Error: ".$e->GetMessage()."\n";
+			return;
+		}
+		echo "Installation successful\n";
+	}
+
+	public static function make($name="") {
+		try {
+			Migration::make($name);
+		} catch(Exception $e) {
+			echo "Error: ".$e->GetMessage()."\n";
+			return;
+		}
+		echo "Migration made\n";
+	}
+
+	public static function roll($maxSteps=false) {
+		Migration::roll($maxSteps);
+	}
+
+	public static function rollback($maxSteps=1) {
+		Migration::rollback($maxSteps);
+	}
+
+	public static function reset() {
+		Migration::reset();
+	}
+}
+
+class MasterController {
+	public static function make($name="") {
+		if(!preg_match('/^[A-Za-z][A-Za-z0-9_]*$/', $name)) {
+			echo "Error: wrong controller name\n";
+		} else {
+			try {
+				$fileName = Controller::make($name);
+				echo "File '$fileName' was created\n";
+			} catch(Exception $e) {
+				echo "Error: ".$e->GetMessage()."\n";
+				return;
+			}
+		}
+	}
+}
+
+class MasterModel {
+	public static function make($name="") {
+		if(!preg_match('/^[A-Za-z][A-Za-z0-9_]*$/', $name)) {
+			echo "Error: wrong model name\n";
+		} else {
+			try {
+				$fileName = Model::make($name);
+				echo "File '$fileName' was created\n";
+			} catch(Exception $e) {
+				echo "Error: ".$e->GetMessage()."\n";
+				return;
+			}
+		}
+	}
+}

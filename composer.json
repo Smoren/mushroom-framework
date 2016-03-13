@@ -1,0 +1,14 @@
+{
+    "name": "smoren/mushroom_framework",
+    "description": "Tiny framework for web apps",
+    "authors": [
+        {
+            "name": "Smoren",
+            "email": "ofigate@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.6.0"
+    }
+}
