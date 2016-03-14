@@ -25,4 +25,12 @@ class Event {
 			$handler($data);
 		}
 	}
+
+	public static function triggerSilent($name, &$data=null) {
+		try {
+			static::trigger($name, $data);
+		} catch(EventException $e) {
+			
+		}
+	}
 }
