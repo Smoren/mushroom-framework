@@ -117,7 +117,7 @@ abstract class User extends Model {
 		return $this;
 	}
 
-	public function set($data, $validate=true) {
+	public function set(array $data, $validate=true) {
 		foreach($data as $key => &$val) {
 			if(in_array($key, array(static::ROW_HASH_AUTH, static::ROW_HASH_RESTORE))) {
 				unset($data[$key]);
