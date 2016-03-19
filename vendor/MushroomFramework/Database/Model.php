@@ -52,7 +52,7 @@ abstract class Model extends QueryBuilder {
 		}
 
 		// отрабатываем событие
-		if($this->exists) $this->onGet();
+		if($this->exists) $this->onAfterGet();
 
 		// подключаем валидацию
 		$this->validator = new Validator(static::$fields, static::validation());
@@ -161,6 +161,8 @@ abstract class Model extends QueryBuilder {
 			}
 		}
 
+		$this->onBeforeSave();
+
 		if($this->exists) {
 			// если объект присутствует в БД, обновляем его
 			static::update(static::$tableName, $fields)->where('id', '=', $this->id)->exec();
@@ -205,7 +207,6 @@ abstract class Model extends QueryBuilder {
 			}
 		}
 		if(!$validate) $this->validator->reset();
-		$this->onSet();
 		return $this->validator;
 	}
 
@@ -213,15 +214,15 @@ abstract class Model extends QueryBuilder {
 	 * Handler of the data getting from DB event
 	 * @return void
 	 */
-	public function onGet() {
+	public function onAfterGet() {
 
 	}
 
 	/**
-	 * Handler of the data setting data by method $this->set()
+	 * Handler of the data setting data by method $this->save()
 	 * @return void
 	 */
-	public function onSet() {
+	public function onBeforeSave() {
 
 	}
 
