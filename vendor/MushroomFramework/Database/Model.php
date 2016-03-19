@@ -171,6 +171,9 @@ abstract class Model extends QueryBuilder {
 			$this->id = static::insert(static::$tableName, $fields)->exec()->getInsertedId();
 			$this->exists = true;
 		}
+
+		$this->onAfterGet();
+
 		return $this;
 	}
 
