@@ -8,12 +8,12 @@ class Product extends Model {
 		return array();
 	}
 
-	function onSet() {
-		$this->reviews = serialize($this->reviews);
+	protected function onSave(&$fields) {
+		$fields['reviews'] = serialize($fields['reviews']);
 	}
 
-	function onGet() {
-		$this->soldOut = boolval($this->soldOut);
-		$this->reviews = unserialize($this->reviews);
+	protected function onGet(&$fields) {
+		$fields['soldOut'] = boolval($fields['soldOut']);
+		$fields['reviews'] = unserialize($fields['reviews']);
 	}
 }
