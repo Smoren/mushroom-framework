@@ -37,6 +37,9 @@ abstract class Model extends QueryBuilder {
 	function __construct($row=false, $exists=false) {
 		$this->exists = $exists;
 
+		// отрабатываем событие
+		if($this->exists) $this->onGet($row);
+
 		// если передали поля, запишем их в объект
 		if(is_array($row)) {
 			$this->row = $row;
@@ -50,9 +53,6 @@ abstract class Model extends QueryBuilder {
 				$this->$fieldName = null;
 			}
 		}
-
-		// отрабатываем событие
-		if($this->exists) $this->onAfterGet();
 
 		// подключаем валидацию
 		$this->validator = new Validator(static::$fields, static::validation());
@@ -161,7 +161,7 @@ abstract class Model extends QueryBuilder {
 			}
 		}
 
-		$this->onBeforeSave();
+		$this->onSave($fields);
 
 		if($this->exists) {
 			// если объект присутствует в БД, обновляем его
@@ -171,8 +171,6 @@ abstract class Model extends QueryBuilder {
 			$this->id = static::insert(static::$tableName, $fields)->exec()->getInsertedId();
 			$this->exists = true;
 		}
-
-		$this->onAfterGet();
 
 		return $this;
 	}
@@ -217,7 +215,7 @@ abstract class Model extends QueryBuilder {
 	 * Handler of the data getting from DB event
 	 * @return void
 	 */
-	protected function onAfterGet() {
+	protected function onGet(&$fields) {
 
 	}
 
@@ -225,7 +223,7 @@ abstract class Model extends QueryBuilder {
 	 * Handler of the data setting data by method $this->save()
 	 * @return void
 	 */
-	protected function onBeforeSave() {
+	protected function onSave(&$fields) {
 
 	}
 
