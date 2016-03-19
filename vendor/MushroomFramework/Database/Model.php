@@ -217,7 +217,7 @@ abstract class Model extends QueryBuilder {
 	 * Handler of the data getting from DB event
 	 * @return void
 	 */
-	public function onAfterGet() {
+	protected function onAfterGet() {
 
 	}
 
@@ -225,7 +225,7 @@ abstract class Model extends QueryBuilder {
 	 * Handler of the data setting data by method $this->save()
 	 * @return void
 	 */
-	public function onBeforeSave() {
+	protected function onBeforeSave() {
 
 	}
 
