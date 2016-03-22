@@ -11,9 +11,11 @@ class Response extends Facade {
 		if(!is_array($data)) {
 			$data = array();
 		}
-		$addr = Uri::make($addr, $data);
-		if(is_array($params) && sizeof($params)) {
-			$addr = $addr->withParams($params);
+		if(!preg_match('/^http[s]{0,1}\:\/\//', $addr)) {
+			$addr = Uri::make($addr, $data);
+			if(is_array($params) && sizeof($params)) {
+				$addr = $addr->withParams($params);
+			}
 		}
 		return static::call('redirect', array($addr, $name, $data, $params, $htmlAttrs));
 	}
