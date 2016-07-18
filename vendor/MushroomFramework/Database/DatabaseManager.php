@@ -57,7 +57,7 @@ abstract class DatabaseManager {
 	 * @return mixed
 	 */
 	public static function get(array $config) {
-		$className = "\\MushroomFramework\\Database\\".ucfirst(mb_strtolower($config['type']))."\\DatabaseManager";
+		$className = "\\MushroomFramework\\Database\\".\ucfirst(\strtolower($config['type']))."\\DatabaseManager";
 		if(class_exists($className)) {
 			return new $className($config);
 		}
@@ -105,6 +105,7 @@ abstract class DatabaseManager {
 	 * @return void
 	 */
 	public function close() {
+		// TODO перенести в Mysql
 		mysqli_close($this->handle);
 	}
     

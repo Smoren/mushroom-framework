@@ -27,7 +27,7 @@ class Router {
 	}
 
 	public static function getRequestMethod() {
-		return mb_strtolower($_SERVER['REQUEST_METHOD']);
+		return strtolower($_SERVER['REQUEST_METHOD']);
 	}
 
 	// добавляет маршрут
@@ -96,7 +96,7 @@ class Router {
 
 	// устанавливает метод (get/post)
 	public function setMethod($method) {
-		$this->method = mb_strtolower($method);
+		$this->method = strtolower($method);
 	}
 
 	// устанавливает действие
