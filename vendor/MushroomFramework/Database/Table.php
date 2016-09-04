@@ -114,6 +114,20 @@ class Table {
 	}
 
 	/**
+	 * Adds foreign key
+	 * @param string $colName
+	 * @param string $forTable
+	 * @param string $forColumn
+	 * @param string $onDelete
+	 * @param string $onUpdate
+	 * @return $this
+	 */
+	public function addForeignKey($colName, $forTable, $forColumn, $onDelete=false, $onUpdate=false) {
+		$this->alter()->addForeignKey($colName, $forTable, $forColumn, $onDelete, $onUpdate)->exec();
+		return $this;
+	}
+
+	/**
 	 * Starts ALTER TABLE query
 	 * @return QueryBuilder
 	 */

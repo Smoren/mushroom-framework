@@ -271,7 +271,6 @@ class QueryBuilder {
 		return $this;
 	}
 
-
 	/**
 	 * Continues ALTER TABLE with ADD UNIQUE
 	 * @param string $colName
@@ -280,6 +279,30 @@ class QueryBuilder {
 	public function addUnique($colName) {
 		$colName = static::formatColName($colName);
 		$this->addToQuery("ADD UNIQUE $colName ($colName)");
+		return $this;
+	}
+
+	/**
+	 * Continues ALTER TABLE with ADD FOREIGN KEY
+	 * @param string $colName
+	 * @param string $forTable
+	 * @param string $forColumn
+	 * @param string $onDelete
+	 * @param string $onUpdate
+	 * @return $this
+	 */
+	public function addForeignKey($colName, $forTable, $forColumn, $onDelete=false, $onUpdate=false) {
+		$colName = static::formatColName($colName);
+		$forTable = static::formatColName($forTable);
+		$forColumn = static::formatColName($forColumn);
+		$this->addToQuery("ADD FOREIGN KEY $colName ($colName)");
+		$this->addToQuery("REFERENCES $forTable ($forColumn)");
+		if($onDelete) {
+			$this->addToQuery("ON DELETE $onDelete");
+		}
+		if($onUpdate) {
+			$this->addToQuery("ON UPDATE $onUpdate");
+		}
 		return $this;
 	}
 
