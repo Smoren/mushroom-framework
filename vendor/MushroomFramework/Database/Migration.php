@@ -13,6 +13,7 @@ abstract class Migration {
 	 * @var string $tableName Name of the migrations table
 	 */
 	protected static $tableName = 'migrations';
+	protected static $dumpFileName = MUSHROOM_DIR_APP_MIGRATIONS.'/dump.csv';
 
 	/**
 	 * Executes the migration's up actions
@@ -48,6 +49,22 @@ abstract class Migration {
 			'className' => $className,
 			'active' => 0,
 		))->exec();
+		static::updateDump();
+	}
+
+	/**
+	 * Saves migrations' table dump
+	 * @return void
+	 */
+	public static function updateDump() {
+		$rs = QueryBuilder::select('id', 'name', 'timestamp', 'className')
+			->from(static::$tableName)
+			->exec();
+		$fh = fopen(static::$dumpFileName, 'w');
+		while($row = $rs->fetch()) {
+			fputcsv($fh, $row);
+		}
+		fclose($fh);
 	}
 
 	/**
@@ -64,8 +81,19 @@ abstract class Migration {
 			'name' => 'VARCHAR(100)',
 			'timestamp' => 'INT',
 			'className' => 'VARCHAR(100)',
-			'active' => 'TINYINT',
+			'active' => 'TINYINT NOT NULL DEFAULT 0',
 		))->exec();
+
+		$fh = fopen(static::$dumpFileName, 'r');
+		while($row = fgetcsv($fh)) {
+			QueryBuilder::insert(static::$tableName, array(
+				'id' => $row[0],
+				'name' => $row[1],
+				'timestamp' => $row[2],
+				'className' => $row[3],
+			))->exec();
+		}
+		fclose($fh);
 	}
 
 	/**
