@@ -9,8 +9,8 @@ abstract class User extends Model {
 	const ROW_ID = 'id';
 	const ROW_LOGIN = 'email';
 	const ROW_PASSWORD = 'password';
-	const ROW_HASH_AUTH = 'hashAuth';
-	const ROW_HASH_RESTORE = 'hashRestore';
+	const ROW_HASH_AUTH = 'hash_auth';
+	const ROW_HASH_RESTORE = 'hash_restore';
 	const COOKIE_ID = 'userId';
 	const COOKIE_HASH_AUTH = 'userHashAuth';
 	const SESSION_KEY = 'user';
