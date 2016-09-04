@@ -155,7 +155,7 @@ abstract class Migration {
 	}
 
 	/**
-	 * Console application's method for rolling back all unrolled migrations.
+	 * Creates table by using Table class
 	 * @param string $tableName Database table name
 	 * @param array $fields Table fields' array
 	 * @return Table
