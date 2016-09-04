@@ -7,6 +7,7 @@ class View {
 	protected static $dir = '/'; // каталог, в котором находятся views относительно /app/views
 	protected static $scripts = array(); // массив путей к скриптам
 	protected static $styles = array(); // массив путей к стилям
+	protected static $meta = array(); // массив мета-тегов
 	protected $path; // путь к шаблону, без php
 	protected $args; // аргументы, переданные view
 	protected $sections; // секции для вставки в родительский элемент
@@ -100,11 +101,23 @@ class View {
 		return $res;
 	}
 
+	public function meta() {
+		$res = '';
+		foreach(static::$meta as $name => $content) {
+			$res .= "<meta name=\"{$name}\" content=\"{$content}\" />\n";
+		}
+		return $res;
+	}
+
 	public function addStyle($src) {
 		static::$styles[] = $src;
 	}
 
 	public function addScript($src) {
 		static::$scripts[] = $src;
+	}
+
+	public function addMeta($name, $content) {
+		static::$meta[$name] = $content;
 	}
 }
