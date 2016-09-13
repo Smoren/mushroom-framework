@@ -65,7 +65,7 @@ class App extends Singleton {
 		return $this->router;
 	}
 
-	// возвращает конигурацию
+	// возвращает конфигурацию
 	public function getConfig() {
 		return $this->config;
 	}
