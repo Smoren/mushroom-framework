@@ -21,19 +21,19 @@ class App extends Singleton {
 			$app = static::gi();
 
 			// запускаем init-файл приложения
-			Event::triggerSilent('onBeforeInitIncluded', $app);
+			Event::trigger('onBeforeInitIncluded', $app);
 			require_once(MUSHROOM_DIR_APP.'/init.php');
-			Event::triggerSilent('onAfterInitIncluded', $app);
+			Event::trigger('onAfterInitIncluded', $app);
 			
 			// запускаем роутер и передаем ему управление
-			Event::triggerSilent('onBeforeRouting', $app);
 			$app->router = new Router();
+			Event::trigger('onBeforeRouting', $app);
 			$response = $app->router->dispatch();
-			Event::triggerSilent('onAfterRouting', $app);
+			Event::trigger('onAfterRouting', $app);
 
-			Event::triggerSilent('onBeforeResponse', $app);
+			Event::trigger('onBeforeResponse', $app);
 			echo $response->make();
-			Event::triggerSilent('onAfterResponse', $app);
+			Event::trigger('onAfterResponse', $app);
 		} catch(Exception $e) {
 			echo $e->getMessage();
 			echo '<pre>'; print_r($e); echo '</pre>';;
@@ -50,14 +50,14 @@ class App extends Singleton {
 		}
 
 		// подключаем СУБД
-		Event::triggerSilent('onBeforeDatabaseInit', $app);
+		Event::trigger('onBeforeDatabaseInit', $app);
 		if($this->config['database'] && $this->config['database']['type']) {
 			$this->database = DatabaseManager::get($this->config['database']);
 			QueryBuilder::setDatabaseType($this->config['database']['type']);
 			QueryBuilder::setEncoding($this->database->getEncoding(), $this->database->getCollate());
 			QueryBuilder::setDatabaseManager($this->database);
 		}
-		Event::triggerSilent('onAfterDatabaseInit', $app);
+		Event::trigger('onAfterDatabaseInit', $app);
 	}
 
 	// возвращает текущий роутер
