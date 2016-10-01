@@ -21,6 +21,9 @@
 	app.controller('ReviewsController', ['$http', function($http) {
 		this.review = {};
 		this.add = function(product) {
+			if(!product.reviews) {
+				product.reviews = [];
+			}
 			product.reviews.push(this.review);
 			this.review = {};
 			$http.post('/product', {product: product}).success(function(res) {
