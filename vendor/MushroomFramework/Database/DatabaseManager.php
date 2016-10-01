@@ -16,6 +16,11 @@ abstract class DatabaseManager {
 	protected static $instance;
 
 	/**
+	 * @var string $type database type
+	 */
+	protected $type;
+
+	/**
 	 * @var string $host Hostname
 	 */
 	protected $host;
@@ -49,6 +54,13 @@ abstract class DatabaseManager {
 	 * @var resource $handle Database connection handle
 	 */
 	protected $handle; // здесь хранится идентификатор соединения
+
+	function __get($name) {
+		if(isset($this->$name)) {
+			return $this->$name;
+		}
+		throw new Exception("DatabaseManager::{$name} is not defined");
+	}
 
 	/**
 	 * Returns DatabaseManager object of database type ($config['database']['type'])

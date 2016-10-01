@@ -8,7 +8,7 @@ use \Exception;
  * @version 0.1.0
  * @author Smoren <ofigate@gmail.com>
  */
-abstract class Model extends QueryBuilder {
+abstract class Model extends QueryBuilderAbstract {
 	/**
 	 * @var string $tableName Name of the model's table
 	 */

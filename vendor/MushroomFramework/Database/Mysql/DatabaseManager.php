@@ -22,6 +22,7 @@ class DatabaseManager extends Database\DatabaseManager {
 	}
 	
 	public function __construct($dbConfig) {
+		$this->type = $dbConfig['type'];
 		$this->host = $dbConfig['host'];
 		$this->username = $dbConfig['username'];
 		$this->password = $dbConfig['password'];

@@ -53,9 +53,10 @@ class App extends Singleton {
 		Event::trigger('onBeforeDatabaseInit', $app);
 		if($this->config['database'] && $this->config['database']['type']) {
 			$this->database = DatabaseManager::get($this->config['database']);
-			QueryBuilder::setDatabaseType($this->config['database']['type']);
-			QueryBuilder::setEncoding($this->database->getEncoding(), $this->database->getCollate());
-			QueryBuilder::setDatabaseManager($this->database);
+			QueryBuilder::setup($this->database);
+			// QueryBuilder::setDatabaseType($this->config['database']['type']);
+			// QueryBuilder::setEncoding($this->database->getEncoding(), $this->database->getCollate());
+			// QueryBuilder::setDatabaseManager($this->database);
 		}
 		Event::trigger('onAfterDatabaseInit', $app);
 	}
