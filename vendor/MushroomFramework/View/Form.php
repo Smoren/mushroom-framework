@@ -15,6 +15,7 @@ class Form {
 	}
 
 	public static function submit($name='', $value='', $attrs='') {
+		if(!is_array($attrs)) $attrs = array();
 		$attrs['type'] = 'submit';
 		$attrs['name'] = $name;
 		$attrs['value'] = $value;
@@ -23,6 +24,7 @@ class Form {
 	}
 
 	public static function button($name='', $value='', $attrs='') {
+		if(!is_array($attrs)) $attrs = array();
 		// $attrs['type'] = 'submit';
 		$attrs['name'] = $name;
 		$res = "<button".static::getAttrsString($attrs).">{$value}</button>";
@@ -30,6 +32,7 @@ class Form {
 	}
 
 	public static function checkbox($name='', $value='', $attrs='', $title='') {
+		if(!is_array($attrs)) $attrs = array();
 		$res = "";
 		$value = $value ? $value : 'On';
 		if(!(($val = static::getValueFromRequest($name, true)) === false)) {
@@ -59,6 +62,7 @@ class Form {
 	}
 
 	public static function radio($name='', $value='', $attrs='', $title='') {
+		if(!is_array($attrs)) $attrs = array();
 		$res = "";
 		if(!(($val = static::getValueFromRequest($name)) === false)) {
 			if($val == $value) {
@@ -83,6 +87,7 @@ class Form {
 	}
 
 	public static function select($name='', $value='', $items='', $attrs='') {
+		if(!is_array($attrs)) $attrs = array();
 		if($value === false) {
 			$value = '';
 		} elseif(!(($val = static::getValueFromRequest($name)) === false)) {
@@ -102,6 +107,7 @@ class Form {
 	}
 
 	public static function text($name='', $value='', $attrs='') {
+		if(!is_array($attrs)) $attrs = array();
 		if($value === false) {
 			$value = '';
 		} elseif(!(($val = static::getValueFromRequest($name)) === false)) {
@@ -121,39 +127,25 @@ class Form {
 	}
 
 	public static function password($name='', $value='', $attrs='') {
-		if($value === false) {
-			$value = '';
-		} elseif(!(($val = static::getValueFromRequest($name)) === false)) {
-			$value = $val;
-		}
+		if(!is_array($attrs)) $attrs = array();
 		$attrs['type'] = 'password';
-		$attrs['name'] = $name;
-		$attrs['value'] = $value;
-		$res = "<input".static::getAttrsString($attrs)." />";
-		return $res;
+		return static::text($name, $value, $attrs);
 	}
 
 	public static function hidden($name='', $value='', $attrs='') {
-		if($value === false) {
-			$value = '';
-		} elseif(!(($val = static::getValueFromRequest($name)) === false)) {
-			$value = $val;
-		}
+		if(!is_array($attrs)) $attrs = array();
 		$attrs['type'] = 'hidden';
-		$attrs['name'] = $name;
-		$attrs['value'] = $value;
-		$res = "<input".static::getAttrsString($attrs)." />";
-		return $res;
+		return static::text($name, $value, $attrs);
 	}
 
 	public static function file($name='', $attrs='') {
+		if(!is_array($attrs)) $attrs = array();
 		$attrs['type'] = 'file';
-		$attrs['name'] = $name;
-		$res = "<input".static::getAttrsString($attrs)." />";
-		return $res;
+		return static::text($name, $value, $attrs);
 	}
 
 	public static function textarea($name='', $value='', $attrs='') {
+		if(!is_array($attrs)) $attrs = array();
 		if($val === false) {
 			$val = '';
 		} elseif(!(($val = static::getValueFromRequest($name)) === false)) {
@@ -167,6 +159,7 @@ class Form {
 	}
 
 	public static function tinymce($name='', $value='', $attrs='') {
+		if(!is_array($attrs)) $attrs = array();
 		$className = 'tinymce-'.rand(100000, 999999);
 		if(!is_array($attrs)) {
 			$attrs = array(
