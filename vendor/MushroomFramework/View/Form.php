@@ -82,17 +82,42 @@ class Form {
 		return $res;
 	}
 
+	public static function select($name='', $value='', $items='', $attrs='') {
+		if($value === false) {
+			$value = '';
+		} elseif(!(($val = static::getValueFromRequest($name)) === false)) {
+			$value = $val;
+		}
+		if(!is_array($items)) {
+			$items = array();
+		}
+		$attrs['name'] = $name;
+		$res = "<select".static::getAttrsString($attrs).">";
+		foreach($items as $val => $title) {
+			if($value == $val) $selected = " selected='selected'"; else $selected = "";
+			$res .= "<option value='{$val}'{$selected}>{$title}</option>";
+		}
+		$res .= "</select>";
+		return $res;
+	}
+
 	public static function text($name='', $value='', $attrs='') {
 		if($value === false) {
 			$value = '';
 		} elseif(!(($val = static::getValueFromRequest($name)) === false)) {
 			$value = $val;
 		}
-		$attrs['type'] = 'text';
+		if(!$attrs['type']) $attrs['type'] = 'text';
 		$attrs['name'] = $name;
 		$attrs['value'] = $value;
 		$res = "<input".static::getAttrsString($attrs)." />";
 		return $res;
+	}
+
+	public static function number($name='', $value='', $attrs='') {
+		if(!is_array($attrs)) $attrs = array();
+		$attrs['type'] = 'number';
+		return static::text($name, $value, $attrs);
 	}
 
 	public static function password($name='', $value='', $attrs='') {
