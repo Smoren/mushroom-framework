@@ -7,6 +7,7 @@ use \MushroomFramework\Database\DatabaseManager;
 use \MushroomFramework\InputOutput\Event;
 use \MushroomFramework\Facades\QueryBuilder;
 use \Exception;
+use \Error;
 use \Closure;
 
 class App extends Singleton {
@@ -35,6 +36,9 @@ class App extends Singleton {
 			echo $response->make();
 			Event::trigger('onAfterResponse', $app);
 		} catch(Exception $e) {
+			echo $e->getMessage();
+			echo '<pre>'; print_r($e); echo '</pre>';;
+		} catch(Error $e) {
 			echo $e->getMessage();
 			echo '<pre>'; print_r($e); echo '</pre>';;
 		}
