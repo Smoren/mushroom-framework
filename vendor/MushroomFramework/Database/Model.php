@@ -120,9 +120,9 @@ abstract class Model extends QueryBuilderAbstract {
 	 */
 	public static function select(...$fields) {
 		if(!sizeof($fields)) $fields = array('*');
-		if(!in_array("*", $fields) && !in_array(static::$tableName.".*", $fields)) {
-			$fields[] = static::$tableName.".*";
-		}
+		// if(!in_array("*", $fields) && !in_array(static::$tableName.".*", $fields)) {
+		// 	$fields[] = static::$tableName.".*";
+		// }
 		return parent::select(...$fields)->from(static::$tableName);
 	}
 
