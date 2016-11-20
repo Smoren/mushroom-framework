@@ -3,9 +3,7 @@
 namespace MushroomFramework\View;
 
 class Html {
-	public static function link($addr, $name, $data=false, $params=false, $htmlAttrs=false) {
-		if(!is_array($data)) $data = array();
-		if(!is_array($params)) $params = array();
+	public static function link($addr, $name, $htmlAttrs=false) {
 		if(!is_array($htmlAttrs)) $htmlAttrs = array();
 
 		$htmlAttrs['href'] = $addr;

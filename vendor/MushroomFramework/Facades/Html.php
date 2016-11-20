@@ -11,6 +11,6 @@ class Html extends Facade {
 		if(is_array($params) && sizeof($params)) {
 			$addr = $addr->withParams($params);
 		}
-		return static::call('link', array($addr, $name, $data, $params, $htmlAttrs));
+		return static::call('link', array($addr, $name, $htmlAttrs));
 	}
 }
