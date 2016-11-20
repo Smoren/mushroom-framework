@@ -36,12 +36,15 @@ class App extends Singleton {
 			echo $response->make();
 			Event::trigger('onAfterResponse', $app);
 		} catch(Exception $e) {
-			echo $e->getMessage();
-			echo '<pre>'; print_r($e); echo '</pre>';;
+			static::showError($e);
 		} catch(Error $e) {
-			echo $e->getMessage();
-			echo '<pre>'; print_r($e); echo '</pre>';;
+			static::showError($e);
 		}
+	}
+
+	public static function showError($e) {
+		echo $e->getMessage();
+		echo '<pre>'; print_r($e); echo '</pre>';;
 	}
 
 	public function init() {
