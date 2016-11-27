@@ -101,9 +101,12 @@ class App extends Singleton {
 		return $this;
 	}
 
-	public function getProperty($name) {
+	public function getProperty($name, $default=null) {
 		if(!isset($this->properties[$name])) {
-			throw new Exception("property '$name' doesn't exist");
+			if($default === null) {
+				throw new Exception("property '$name' doesn't exist");
+			}
+			return $default;
 		}
 		return $this->properties[$name];
 	}
