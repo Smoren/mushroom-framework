@@ -5,7 +5,7 @@ use \MushroomFramework\Routing\Router;
 use \MushroomFramework\Pattern\Singleton;
 use \MushroomFramework\Database\DatabaseManager;
 use \MushroomFramework\InputOutput\Event;
-use \MushroomFramework\Facades\QueryBuilder;
+use \MushroomFramework\Database\QueryBuilder;
 use \Exception;
 use \Error;
 use \Closure;

@@ -13,7 +13,7 @@ return array(
 		'Cookie' => '\MushroomFramework\Facades\Cookie',
 		'Form' => '\MushroomFramework\Facades\Form',
 		'Html' => '\MushroomFramework\Facades\Html',
-		'QueryBuilder' => '\MushroomFramework\Facades\QueryBuilder',
+		'QueryBuilder' => '\MushroomFramework\Database\QueryBuilder',
 		'Event' => '\MushroomFramework\Facades\Event',
 		'Controller' => '\MushroomFramework\Routing\Controller',
 		'Model' => '\MushroomFramework\Database\Model',
