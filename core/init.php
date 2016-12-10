@@ -2,8 +2,10 @@
 
 use \MushroomFramework\Main\App;
 
-// инициализируем сессию
-session_start();
+if(function_exists('session_start')) {
+	// инициализируем сессию
+	session_start();
+}
 
 // объявляем константы
 define('MUSHROOM_DIR_ROOT', dirname(__DIR__));
