@@ -48,24 +48,30 @@ class App extends Singleton {
 	}
 
 	public function init() {
-		// подключаем конфигурацию
-		$this->config = require(MUSHROOM_DIR_APP_CONFIG.'/config.php');
+		try {
+			// подключаем конфигурацию
+			$this->config = require(MUSHROOM_DIR_APP_CONFIG.'/config.php');
 
-		// настраиваем алиасы классов
-		foreach($this->config['classAliases'] as $serviceName => $className) {
-			class_alias($className, $serviceName);
-		}
+			// настраиваем алиасы классов
+			foreach($this->config['classAliases'] as $serviceName => $className) {
+				class_alias($className, $serviceName);
+			}
 
-		// подключаем СУБД
-		Event::trigger('onBeforeDatabaseInit', $app);
-		if($this->config['database'] && $this->config['database']['type']) {
-			$this->database = DatabaseManager::get($this->config['database']);
-			QueryBuilder::setup($this->database);
-			// QueryBuilder::setDatabaseType($this->config['database']['type']);
-			// QueryBuilder::setEncoding($this->database->getEncoding(), $this->database->getCollate());
-			// QueryBuilder::setDatabaseManager($this->database);
+			// подключаем СУБД
+			Event::trigger('onBeforeDatabaseInit', $app);
+			if($this->config['database'] && $this->config['database']['type']) {
+				$this->database = DatabaseManager::get($this->config['database']);
+				QueryBuilder::setup($this->database);
+				// QueryBuilder::setDatabaseType($this->config['database']['type']);
+				// QueryBuilder::setEncoding($this->database->getEncoding(), $this->database->getCollate());
+				// QueryBuilder::setDatabaseManager($this->database);
+			}
+			Event::trigger('onAfterDatabaseInit', $app);
+		} catch(Exception $e) {
+			static::showError($e);
+		} catch(Error $e) {
+			static::showError($e);
 		}
-		Event::trigger('onAfterDatabaseInit', $app);
 	}
 
 	// возвращает текущий роутер
