@@ -131,7 +131,7 @@ class Table {
 	 * Starts ALTER TABLE query
 	 * @return QueryBuilder
 	 */
-	protected function alter() {
+	public function alter() {
 		return QueryBuilder::alterTable($this->tableName);
 	}
 }
