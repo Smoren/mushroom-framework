@@ -9,7 +9,7 @@ class Uri {
 	public static function make($addr, ...$data) {
 		if(!$data) $data = array();
 		elseif(is_array($data[0])) $data = $data[0];
-		$route = Router::findAnyRoute($addr, sizeof($data));
+		$route = Router::findRoute($addr, sizeof($data));
 		return new static($route->getUri($data));
 	}
 

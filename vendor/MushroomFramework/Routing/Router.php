@@ -24,6 +24,12 @@ class Router {
 		// устанавливаем метод
 		if(!$method) $method = static::getRequestMethod();
 		$this->setMethod($method);
+
+		static::$instance = $this;
+	}
+
+	public static function gi() {
+		return static::$instance;
 	}
 
 	public static function getRequestMethod() {
@@ -33,7 +39,6 @@ class Router {
 	// добавляет маршрут
 	public static function addRoute(Route $route) {
 		static::$routes[] = $route;
-		$method = $route->getMethod();
 		$addr = $route->getAddr();
 		$argsSize = $route->getArgsSize();
 		$route->addToTree(static::$routesTree);
@@ -52,33 +57,12 @@ class Router {
 	}
 
 	// ищет маршрут
-	public static function findRoute($addr, $argsSize, $method=false) {
-		if(!$method) {
-			$method = $this->getCurrentMethod();
-		}
-		if(isset(static::$routesTree[$method][$addr][$argsSize])) {
-			return static::$routesTree[$method][$addr][$argsSize];
+	public static function findRoute($addr, $argsSize) {
+		if(isset(static::$routesTree[$addr][$argsSize])) {
+			return static::$routesTree[$addr][$argsSize];
 		} else {
 			throw new Exceptions\RouteException("route '$addr' with size of args $argsSize not found");
 		}
-	}
-
-	// ищет маршрут с любым методом
-	public static function findAnyRoute($addr, $argsSize) {
-		$method = static::getRequestMethod();
-		$route = null;
-		foreach(static::$routesTree as $method => $val) {
-			try {
-				$route = static::findRoute($addr, $argsSize, $method);
-				if($route) break;
-			} catch(Exceptions\RouteException $e) {
-				$errorMessage = $e->getMessage();
-			}
-		}
-		if(!$route) {
-			throw new Exceptions\RouteException($errorMessage);
-		}
-		return $route;
 	}
 
 	// возвращает маршрут обработки ошибки по ее имени (Exception)
@@ -94,19 +78,28 @@ class Router {
 		return $this->method;
 	}
 
-	// устанавливает метод (get/post)
+	// устанавливает метод (get/post/...)
 	public function setMethod($method) {
-		$this->method = strtolower($method);
+		$this->method = strtoupper($method);
+	}
+
+	// сравнивает текущий метод с переданным
+	public function checkMethod($method) {
+		return strtoupper($this->method) === strtoupper($method);
 	}
 
 	// устанавливает действие
 	public function setAction($action) {
-		$this->action = $this->method.\ucfirst($action);
+		$this->action = $action;
 	}
 
 	// устанавливает контроллер
 	public function setController($controller) {
-		$this->controller = "\\".\ucfirst($controller).'Controller';
+		if($controller) {
+			$this->controller = "\\".\ucfirst($controller).'Controller';
+		} else {
+			$this->controller = false;
+		}
 	}
 
 	// устанавливает аргумент для передачи в action
@@ -123,7 +116,7 @@ class Router {
 	public function dispatch() {
 		// пробуем найти подходящий маршрут
 		foreach(static::$routes as $route) {
-			if($route->check($this->method, $this->uri)) {
+			if($route->check($this->uri)) {
 				return $route->go($this);
 			}
 		}
@@ -133,7 +126,16 @@ class Router {
 	// обрабатывает ошибки перед выполнением или передачей управления
 	public function handle() {
 		try {
-			return $this->transfer();
+			if(!$this->controller) {
+				throw new Exceptions\PageNotFoundException("No route found");
+			} elseif(!class_exists($this->controller)) {
+				throw new Exceptions\RouteException("Class {$this->controller} not exists");
+			} elseif(!method_exists($this->controller, $this->action)) {
+				throw new Exceptions\RouteException("Method {$this->controller}::{$this->action}() not exists");
+			}
+
+			$this->controllerInstance = new $this->controller($this->method);
+			return call_user_func_array(array($this->controllerInstance, $this->action), $this->data);
 		} catch(Exceptions\PageNotFoundException $e) {
 			if($route = static::getError('PageNotFound')) {
 				$router = $this;
@@ -142,21 +144,18 @@ class Router {
 			throw new Exceptions\PageNotFoundException('no 404 handler');
 		}
 	}
-
-	// передает управление контроллеру
-	public function transfer() {
-		if(!$this->controller) {
-			throw new Exceptions\PageNotFoundException("No route found");
-		} elseif(!class_exists($this->controller)) {
-			throw new Exceptions\RouteException("Class {$this->controller} not exists");
-		} elseif(!method_exists($this->controller, $this->action)) {
-			throw new Exceptions\RouteException("Method {$this->controller}::{$this->action}() not exists");
-		} else {
-			$this->controllerInstance = new $this->controller();
-			return call_user_func_array(array($this->controllerInstance, $this->action), $this->data);
-		}
-	}
 	
+	// передача управления
+	public function transfer($where, $data=false) {
+		$arWhere = explode('@', $where);
+		$this->setController($arWhere[0]);
+		$this->setAction($arWhere[1]);
+		if(is_array($data)) {
+			$this->setData($data);
+		}
+		return $this->handle();
+	}
+
 	// парсит URI
 	protected function parseUri($uri) {
 		$arUri = explode('?', $uri);

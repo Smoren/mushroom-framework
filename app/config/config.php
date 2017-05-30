@@ -6,6 +6,7 @@ return array(
 	'classAliases' => array(
 		'App' => '\MushroomFramework\Facades\App',
 		'Route' => '\MushroomFramework\Facades\Route',
+		'Router' => '\MushroomFramework\Facades\Router',
 		'Uri' => '\MushroomFramework\Facades\Uri',
 		'Response' => '\MushroomFramework\Facades\Response',
 		'Request' => '\MushroomFramework\Facades\Request',
