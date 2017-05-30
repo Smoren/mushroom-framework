@@ -49,7 +49,7 @@ abstract class User extends Model {
 			return $user;
 		}
 
-		$user = static::select()->where('id', '=', $cookieUserId)->andWhere(static::ROW_HASH_AUTH, '=', $cookieUserHashAuth)->getFirst();
+		$user = static::select()->where(static::$primaryKey, '=', $cookieUserId)->andWhere(static::ROW_HASH_AUTH, '=', $cookieUserHashAuth)->getFirst();
 		if(!$user) {
 			static::$error = 'INCORRECT_AUTH_COOKIE';
 			return false;

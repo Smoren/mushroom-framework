@@ -13,6 +13,11 @@ abstract class Model extends QueryBuilderAbstract {
 	 * @var string $tableName Name of the model's table
 	 */
 	protected static $tableName;
+	
+	/**
+	 * @var string $primaryKey Name primary key
+	 */
+	protected static $primaryKey = 'id';
 
 	/**
 	 * @var array $fields array of row's fields
@@ -97,7 +102,7 @@ abstract class Model extends QueryBuilderAbstract {
 	 * @return mixed (false or Model)
 	 */
 	public static function find($id) {
-		$row = static::select()->where('id', '=', $id)->exec()->fetch();
+		$row = static::select()->where(static::$primaryKey, '=', $id)->exec()->fetch();
 		if(!$row) return false;
 		return new static($row, true);
 	}
@@ -154,6 +159,7 @@ abstract class Model extends QueryBuilderAbstract {
 	 * @return $this
 	 */
 	public function save() {
+		$primaryKey = static::$primaryKey;
 		$fields = array();
 		foreach(static::$fields as $fieldName) {
 			if(isset($this->$fieldName)) {
@@ -165,10 +171,10 @@ abstract class Model extends QueryBuilderAbstract {
 
 		if($this->exists) {
 			// если объект присутствует в БД, обновляем его
-			static::update(static::$tableName, $fields)->where('id', '=', $this->id)->exec();
+			static::update(static::$tableName, $fields)->where(static::$primaryKey, '=', $this->$primaryKey)->exec();
 		} else {
 			// иначе добавляем его в БД
-			$this->id = static::insert(static::$tableName, $fields)->exec()->getInsertedId();
+			$this->$primaryKey = static::insert(static::$tableName, $fields)->exec()->getInsertedId();
 			$this->exists = true;
 		}
 
@@ -176,14 +182,15 @@ abstract class Model extends QueryBuilderAbstract {
 	}
 
 	/**
-	 * Insert or update (depends of $this->exists) object as a row of model's table
+	 * Removes object from table
 	 * @return $this
 	 */
 	public function remove($tableName=false) {
 		if(!$this->exists) return false;
+		$primaryKey = static::$primaryKey;
 		$tableName = $tableName ? $tableName : static::$tableName;
 		$this->exists = false;
-		static::delete($tableName)->where('id', '=', $this->id)->exec();
+		static::delete($tableName)->where(static::$primaryKey, '=', $this->$primaryKey)->exec();
 		return $this;
 	}
 

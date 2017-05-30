@@ -2,7 +2,7 @@
 
 class User extends UserModel {
 	protected static $tableName = 'users';
-	protected static $fields = array('id', 'email', 'password', 'hashAuth', 'hashRestore', 'name');
+	protected static $fields = array(static::$primaryKey, 'email', 'password', 'hashAuth', 'hashRestore', 'name');
 	protected $id;
 	protected $email;
 	protected $password;

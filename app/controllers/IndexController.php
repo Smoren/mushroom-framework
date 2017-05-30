@@ -2,32 +2,11 @@
 
 class IndexController extends Controller {
 	public function getIndex() {
-		// Form::start();
- 		$test = Request::get();
 		return Response::view('index');
  	}
 
- 	public function getProducts() {
- 		$products = Product::select()->getList();
- 		return Response::json($products);
- 	}
-
- 	public function postProduct() {
- 		$product = Request::json('product');
- 		$dbProduct = Product::find($product['id']);
- 		
- 		if($dbProduct) {
- 			$dbProduct->set($product);
- 			$dbProduct->save();
- 		}
-
- 		return Response::json($dbProduct);
- 	}
-
  	public function getTestModel() {
- 		// $news = News::select('id', 'name')->getList();
- 		// echo '<pre>'; print_r($news); echo '</pre>';
-		if($news = News::find(1)) {
+ 		if($news = News::find(1)) {
 			$validator = $news->set(array(
 				'name' => 'test name',
 				'text' => 'a lot of text',
@@ -58,9 +37,5 @@ class IndexController extends Controller {
  		print_r(array(User::error()));
  		print_r($user);
  		return Response::text('end');
- 	}
-
- 	public function getRows() {
- 		return Response::view('rows');
  	}
 }
