@@ -4,10 +4,10 @@ namespace MushroomFramework\View;
 
 // класс представления
 class View {
-	protected static $dir = '/'; // каталог, в котором находятся views относительно /app/views
 	protected static $scripts = array(); // массив путей к скриптам
 	protected static $styles = array(); // массив путей к стилям
 	protected static $meta = array(); // массив мета-тегов
+	protected $dir = ''; // каталог, в котором находятся views относительно /app/views
 	protected $path; // путь к шаблону, без php
 	protected $args; // аргументы, переданные view
 	protected $sections; // секции для вставки в родительский элемент
@@ -15,12 +15,15 @@ class View {
 	protected $parent = false; // родительский view
 	protected $currentSectionName = false; // имя текущей секции
 
-	function __construct($path=false) {
-		if($path) $this->init($path);
+	function __construct($path='', $dir='') {
+		if($path) $this->init($path, $dir);
 	}
 
-	public function init($path) {
-		$this->path = MUSHROOM_DIR_APP_VIEWS.static::$dir.$path.'.php';
+	public function init($path, $dir='') {
+		$arDir = explode('/', "{$dir}/{$path}");
+		array_pop($arDir);
+		$this->dir = implode('/', $arDir);
+		$this->path = MUSHROOM_DIR_APP_VIEWS."{$dir}/{$path}.php";
 		if(!is_file($this->path)) {
 			throw new Exceptions\ViewException("view '{$this->path}' is not found");
 		}
@@ -53,7 +56,7 @@ class View {
 
 	// подключает родительский шаблон
 	public function parent($path) {
-		$this->parent = new static($path);
+		$this->parent = new static($path, $this->dir);
 	}
 
 	// вставляет секцию
@@ -66,7 +69,7 @@ class View {
 
 	// подключает view
 	public function insert($path) {
-		$view = new static($path);
+		$view = new static($path, $this->dir);
 		return $view->make($this->args);
 	}
 

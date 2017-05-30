@@ -2,7 +2,7 @@
 
 class IndexController extends Controller {
 	public function getIndex() {
-		return Response::view('index');
+		return Response::view('example/index');
  	}
 
  	public function getTestModel() {

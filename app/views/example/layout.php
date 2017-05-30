@@ -11,7 +11,7 @@ $this->addScript('/assets/js/store.js');
 <!DOCTYPE html>
 <html ng-app="store">
 	<head>
-		<meta charset="UTF-8">
+		<meta charset="UTF-8" />
 		<title><?php echo $this->place('title')?></title>
 		<?php echo $this->styles()?>
 		<?php echo $this->scripts()?>
