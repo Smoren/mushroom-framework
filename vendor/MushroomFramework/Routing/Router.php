@@ -9,24 +9,12 @@ class Router {
 	protected static $routesTree = array();
 	protected static $errors = array();
 	protected $controller; // имя контроллера
+	protected $controllerInstance; // экземпляр используемого контроллера
 	protected $action; // имя дейтсвия
 	protected $method; // метод (get/post)
 	protected $uri; // строка запроса
 	protected $arUri = array(); // распарсированный запрос
 	protected $data = array(); // данные, которые будут переданы аргументами в action
-	protected $controllerInstance; // экземпляр используемого контроллера
-
-	function __construct($uri=false, $method=false) {
-		// парсим URI
-		if(!$uri) $uri = $_SERVER['REQUEST_URI'];
-		$this->parseUri($uri);
-
-		// устанавливаем метод
-		if(!$method) $method = static::getRequestMethod();
-		$this->setMethod($method);
-
-		static::$instance = $this;
-	}
 
 	public static function gi() {
 		return static::$instance;
@@ -63,6 +51,18 @@ class Router {
 		} else {
 			throw new Exceptions\RouteException("route '$addr' with size of args $argsSize not found");
 		}
+	}
+
+	function __construct($uri=false, $method=false) {
+		// парсим URI
+		if(!$uri) $uri = $_SERVER['REQUEST_URI'];
+		$this->parseUri($uri);
+
+		// устанавливаем метод
+		if(!$method) $method = static::getRequestMethod();
+		$this->setMethod($method);
+
+		if(!static::$instance) static::$instance = $this;
 	}
 
 	// возвращает маршрут обработки ошибки по ее имени (Exception)
@@ -127,7 +127,7 @@ class Router {
 	public function handle() {
 		try {
 			if(!$this->controller) {
-				throw new Exceptions\PageNotFoundException("No route found");
+				throw new Exceptions\NotFoundException("No route found");
 			} elseif(!class_exists($this->controller)) {
 				throw new Exceptions\RouteException("Class {$this->controller} not exists");
 			} elseif(!method_exists($this->controller, $this->action)) {
@@ -136,18 +136,18 @@ class Router {
 
 			$this->controllerInstance = new $this->controller($this->method);
 			return call_user_func_array(array($this->controllerInstance, $this->action), $this->data);
-		} catch(Exceptions\PageNotFoundException $e) {
-			if($route = static::getError('PageNotFound')) {
+		} catch(Exceptions\NotFoundException $e) {
+			if($route = static::getError('NotFound')) {
 				$router = $this;
 				return $route->go($router);
 			}
-			throw new Exceptions\PageNotFoundException('no 404 handler');
+			throw new Exceptions\NotFoundException('no 404 handler');
 		}
 	}
 	
 	// передача управления
 	public function transfer($where, $data=false) {
-		$arWhere = explode('@', $where);
+		$arWhere = explode('.', $where);
 		$this->setController($arWhere[0]);
 		$this->setAction($arWhere[1]);
 		if(is_array($data)) {

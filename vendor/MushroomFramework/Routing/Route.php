@@ -6,13 +6,25 @@ namespace MushroomFramework\Routing;
 class Route {
 	protected static $patterns; // понадобится в дальнейшем (как в Laravel)
 	protected $mask; // маска URI
+	protected $addr; // Controller.action
 	protected $regexp; // маска URI, преобразованная в regexp
 	protected $callback; // функция обратного вызова
-	protected $addr; // Controller@action
 	protected $controller; // имя контроллера
 	protected $action; // имя действия
 	protected $data; // ассоциативный массив аргументов для action/callback
 	protected $args = array(); // имена аргументов для action/callback
+
+	// фабрика для создания и добавления маршрута в диспетчер (method=any)
+	public static function register($mask, $callback) {
+		$route = new static($mask, $callback);
+		return Router::addRoute($route);
+	}
+
+	// фабрика создания и добавления обработчика ошибок
+	public static function error($exceptionName, $callback) {
+		$route = new static(false, $callback);
+		return Router::addError($exceptionName, $route);
+	}
 
 	function __construct($mask, $callback) {
 		$this->setMask($mask);
@@ -31,19 +43,19 @@ class Route {
 		$this->regexp = '/^'.preg_quote($mask, '/').'[\/]{0,1}$/';
 	}
 
-	// устанавливает callback/Controller@action
+	// устанавливает callback/Controller.action
 	public function setCallback($callback) {
 		if($callback instanceof \Closure) {
 			$this->callback = $callback;
 		} else {
+			$arCallback = explode('.', $callback);
 			$this->addr = $callback;
-			$callback = explode('@', $callback);
-			$this->controller = $callback[0];
-			$this->action = $callback[1];
+			$this->controller = $arCallback[0];
+			$this->action = $arCallback[1];
 		}
 	}
 
-	// запуск callback/Controller@action
+	// запуск callback/Controller.action
 	public function go(Router $router) {
 		$router->setData($this->data);
 		if($this->callback instanceof \Closure) {
@@ -56,29 +68,6 @@ class Route {
 		}
 	}
 
-	// фабрика для создания и добавления маршрута в диспетчер (method=any)
-	public static function register($mask, $callback) {
-		$route = new static($mask, $callback);
-		return Router::addRoute($route);
-	}
-
-	// фабрика создания и добавления обработчика ошибок
-	public static function error($exceptionName, $callback) {
-		$route = new static(false, $callback);
-		return Router::addError($exceptionName, $route);
-	}
-
-	// передача управления
-	public static function transfer(Router $router, $where, $data=false) {
-		$route = new static($where);
-		$router->setController($route->getController());
-		$router->setAction($route->getAction());
-		if(is_array($data)) {
-			$router->setData($data);
-		}
-		return $router->handle();
-	}
-
 	// возвращает контроллер
 	public function getController() {
 		return $this->controller;
@@ -89,7 +78,7 @@ class Route {
 		return $this->action;
 	}
 
-	// возвращает Controller@action
+	// возвращает Controller.action
 	public function getAddr() {
 		return $this->addr;
 	}
@@ -121,7 +110,7 @@ class Route {
 		return true;
 	}
 
-	// проверяет, подходит ли переданный URI под маску маршрута, собирает аргументы для callback/Controller@action
+	// проверяет, подходит ли переданный URI под маску маршрута, собирает аргументы для callback/Controller.action
 	public function check($uri) {
 		preg_match($this->regexp, $uri, $matches);
 		if(!sizeof($matches)) return false;

@@ -28,18 +28,15 @@ Event::register('another', function($data=null) {
 ******************************/
 
 // error 404
-Route::error('PageNotFound', function() {
-	Response::status(404);
-	return Response::text('404 страница не найдена');
-});
+Route::error('NotFound', 'Error.notFound');
 
 // index
-Route::register('/', 'Index@index');
-Route::register('/news/{id}', 'Index@detail')->where(array(
+Route::register('/', 'Index.index');
+Route::register('/news/{id}', 'Index.detail')->where(array(
 	'id' => '[0-9_\-]+',
 ));
-Route::register('/test/method', 'Test@method');
-Route::register('/test/transfer', 'Test@transfer');
+Route::register('/test/method', 'Test.method');
+Route::register('/test/transfer', 'Test.transfer');
 
 
 
