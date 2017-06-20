@@ -185,9 +185,10 @@ class Form {
 	}
 
 	public static function getAttrsString($attrs) {
+		$res = '';
 		foreach($attrs as $attrName => $attrVal) {
-			$attrName = htmlspecialchars($attrName);
-			$attrVal = htmlspecialchars($attrVal);
+			$attrName = htmlspecialchars($attrName, null, ini_get('default_charset'));
+			$attrVal = htmlspecialchars($attrVal, null, ini_get('default_charset'));
 			$res .= " {$attrName}=\"$attrVal\"";
 		}
 		return $res;
