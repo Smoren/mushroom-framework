@@ -148,6 +148,14 @@ abstract class Model extends QueryBuilderAbstract {
 	}
 
 	/**
+	 * Finishs the sql query, executes it and returns array of of Model objects
+	 * @return array
+	 */
+	public function list() {
+		return $this->getList();
+	}
+
+	/**
 	 * Finishs the sql query, executes it and returns Model of the first found row or false ii rows are not found
 	 * @return mixed (Model or false)
 	 */
@@ -155,6 +163,14 @@ abstract class Model extends QueryBuilderAbstract {
 		$row = $this->exec()->fetch();
 		if($row) return new static($row, true);
 		return false;
+	}
+
+	/**
+	 * Finishs the sql query, executes it and returns Model of the first found row or false ii rows are not found
+	 * @return mixed (Model or false)
+	 */
+	public function first() {
+		return $this->getFirst();
 	}
 
 	/**

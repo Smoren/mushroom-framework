@@ -80,6 +80,15 @@ abstract class QueryBuilderAbstract {
 	}
 
 	/**
+	 * Adds $str as $this->queryString
+	 * @param string $str
+	 * @return QueryBuilder
+	 */
+	public function raw($str) {
+		return $this->addToQuery($str);
+	}
+
+	/**
 	 * Returns query string
 	 * @return string
 	 */
