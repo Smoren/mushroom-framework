@@ -43,7 +43,7 @@ abstract class Model extends QueryBuilderAbstract {
 		$this->exists = $exists;
 
 		// отрабатываем событие
-		if($this->exists) $this->onGet($row);
+		if($this->exists) $this->onBeforeDataBound($row);
 
 		// если передали поля, запишем их в объект
 		if(is_array($row)) {
@@ -61,6 +61,9 @@ abstract class Model extends QueryBuilderAbstract {
 
 		// подключаем валидацию
 		$this->validator = new Validator(static::$fields, static::validation());
+		
+		// отрабатываем событие
+		if($this->exists) $this->onAfterDataBound($row);
 	}
 
 	function __get($attrName) {
@@ -167,16 +170,19 @@ abstract class Model extends QueryBuilderAbstract {
 			}
 		}
 
-		$this->onSave($fields);
+		$this->onBeforeSave($fields);
 
 		if($this->exists) {
 			// если объект присутствует в БД, обновляем его
 			static::update(static::$tableName, $fields)->where(static::$primaryKey, '=', $this->$primaryKey)->exec();
 		} else {
 			// иначе добавляем его в БД
-			$this->$primaryKey = static::insert(static::$tableName, $fields)->exec()->getInsertedId();
+			$insertedId = static::insert(static::$tableName, $fields)->exec()->getInsertedId();
+			if($insertedId) $this->$primaryKey = $insertedId;
 			$this->exists = true;
 		}
+
+		$this->onAfterSave($fields);
 
 		return $this;
 	}
@@ -222,7 +228,15 @@ abstract class Model extends QueryBuilderAbstract {
 	 * Handler of the data getting from DB event
 	 * @return void
 	 */
-	protected function onGet(&$fields) {
+	protected function onBeforeDataBound(&$fields) {
+
+	}
+
+	/**
+	 * Handler of the data getting from DB event
+	 * @return void
+	 */
+	protected function onAfterDataBound(&$fields) {
 
 	}
 
@@ -230,7 +244,15 @@ abstract class Model extends QueryBuilderAbstract {
 	 * Handler of the data setting data by method $this->save()
 	 * @return void
 	 */
-	protected function onSave(&$fields) {
+	protected function onBeforeSave(&$fields) {
+
+	}
+
+	/**
+	 * Handler of the data setting data by method $this->save()
+	 * @return void
+	 */
+	protected function onAfterSave(&$fields) {
 
 	}
 

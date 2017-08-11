@@ -37,6 +37,7 @@ Route::register('/news/{id}', 'Index.detail')->where(array(
 ));
 Route::register('/test/method', 'Test.method');
 Route::register('/test/transfer', 'Test.transfer');
+Route::register('/test/test', 'Test.test');
 
 
 

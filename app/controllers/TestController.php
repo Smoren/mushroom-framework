@@ -1,5 +1,7 @@
 <?php
 
+use MushroomFramework\Pattern\Uuid;
+
 class TestController extends Controller {
  	public function method() {
  		if(Router::checkMethod('GET')) {
@@ -8,6 +10,17 @@ class TestController extends Controller {
  			$text = 'Method is '.Router::getMethod();
  		}
  		return Response::text($text);
+ 	}
+
+ 	public function test() {
+ 		$tu1 = new TestUuid();
+ 		$tu1->title = rand(1000, 9999);
+ 		$tu1->save();
+ 		echo "id: {$tu1->id}\ntitle: {$tu1->title}\n\n";
+
+ 		$tu2 = TestUuid::find($tu1->id);
+ 		echo "id: {$tu2->id}\ntitle: {$tu2->title}";
+ 		return Response::text();
  	}
 
  	public function transfer() {

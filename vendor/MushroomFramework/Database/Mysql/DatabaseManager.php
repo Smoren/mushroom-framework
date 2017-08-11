@@ -67,7 +67,9 @@ class DatabaseManager extends Database\DatabaseManager {
 	 * @return QueryResult
 	 */
 	public function query($queryString) {
-		return new QueryResult(mysqli_query($this->handle, $queryString), $this->handle);
+		$rs = mysqli_query($this->handle, $queryString);
+		if(!$rs) throw new Exception(mysqli_error($this->handle));
+		return new QueryResult($rs, $this->handle);
 	}
 
 	/**
