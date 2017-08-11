@@ -55,10 +55,11 @@ abstract class RestController extends Controller {
 	}
 
 	public function create() {
+		// TODO: научиться обрабатывать валидацию
 		$modelName = static::$modelName;
 		$item = new $modelName(Request::json());
 		$item->save();
-		return Response::json($item->getId());
+		return Response::json($item->asArray());
 	}
 
 	public function detail($id) {
@@ -72,6 +73,7 @@ abstract class RestController extends Controller {
 	}
 
 	public function update($id) {
+		// TODO: научиться обрабатывать валидацию
 		$modelName = static::$modelName;
 		$item = $modelName::find($id);
 		if(!$item) {
@@ -91,6 +93,6 @@ abstract class RestController extends Controller {
 			return Response::json(array('error' => 'item not found'));
 		}
 		$item->remove();
-		return Response::json('');
+		return Response::json(null);
 	}
 }

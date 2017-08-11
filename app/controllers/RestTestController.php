@@ -2,6 +2,6 @@
 
 use MushroomFramework\Pattern\Uuid;
 
-class TestRestController extends RestController {
+class RestTestController extends RestController {
  	protected static $modelName = 'TestUuid';
 }

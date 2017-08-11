@@ -199,6 +199,7 @@ abstract class Model extends QueryBuilderAbstract {
 	 * @return $this
 	 */
 	public function save() {
+		// TODO: вставить валидацию, убрать ее из set()
 		$primaryKey = static::$primaryKey;
 		$fields = array();
 		foreach(static::$fields as $fieldName) {

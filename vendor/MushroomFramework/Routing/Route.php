@@ -20,6 +20,26 @@ class Route {
 		return Router::addRoute($route);
 	}
 
+	// фабрика для создания и добавления маршрута в диспетчер (method=any)
+	public static function rest($mask, $controllerName, $idRegExp='[0-9]+') {
+		$mask = preg_replace('/[\/]+$/', '', $mask);
+		
+		// добавляем маршрут для доступа к collection
+		$route = new static($mask, "{$controllerName}.collection");
+		$collectionRoute = Router::addRoute($route);
+		
+		// добавляем маршрут для доступа к item
+		$route = new static("{$mask}/%id%", "{$controllerName}.item");
+		$itemRoute = Router::addRoute($route);
+		$itemRoute->where(array(
+			'id' => $idRegExp,
+		));
+		return array(
+			'collection' => $collectionRoute,
+			'item' => $itemRoute,
+		);
+	}
+
 	// фабрика создания и добавления обработчика ошибок
 	public static function error($exceptionName, $callback) {
 		$route = new static(false, $callback);

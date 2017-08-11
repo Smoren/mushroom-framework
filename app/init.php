@@ -39,10 +39,12 @@ Route::register('/test/method', 'Test.method');
 Route::register('/test/transfer', 'Test.transfer');
 Route::register('/test/test', 'Test.test');
 
-Route::register('/rest', 'TestRest.collection');
-Route::register('/rest/{id}', 'TestRest.item')->where(array(
-	'id' => '[a-f0-9\-]+'
-));
+Route::rest('/rest/test', 'RestTest', '[0-9a-f\-]+');
+Route::rest('/rest/news', 'RestNews');
+// Route::register('/rest', 'TestRest.collection');
+// Route::register('/rest/{id}', 'TestRest.item')->where(array(
+// 	'id' => '[a-f0-9\-]+'
+// ));
 
 
 
