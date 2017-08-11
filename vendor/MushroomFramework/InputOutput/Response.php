@@ -29,6 +29,11 @@ class Response {
 		http_response_code($statusCode);
 	}
 
+	public static function error($statusCode, $message='') {
+		static::status($statusCode);
+		return static::text($message);
+	}
+
 	public static function mimeType($type=null) {
 		if(!$type) {
 			$type = 'text/plain';

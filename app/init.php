@@ -33,12 +33,16 @@ Route::error('NotFound', 'Error.notFound');
 // index
 Route::register('/', 'Index.index');
 Route::register('/news/{id}', 'Index.detail')->where(array(
-	'id' => '[0-9_\-]+',
+	'id' => '[0-9]+',
 ));
 Route::register('/test/method', 'Test.method');
 Route::register('/test/transfer', 'Test.transfer');
 Route::register('/test/test', 'Test.test');
 
+Route::register('/rest', 'TestRest.collection');
+Route::register('/rest/{id}', 'TestRest.item')->where(array(
+	'id' => '[a-f0-9\-]+'
+));
 
 
 

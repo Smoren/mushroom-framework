@@ -135,7 +135,7 @@ abstract class Model extends QueryBuilderAbstract {
 	}
 
 	/**
-	 * Finishs the sql query, executes it and returns array of of Model objects
+	 * Finishs the sql query, executes it and returns array of Model objects
 	 * @return array
 	 */
 	public function getList() {
@@ -148,11 +148,32 @@ abstract class Model extends QueryBuilderAbstract {
 	}
 
 	/**
-	 * Finishs the sql query, executes it and returns array of of Model objects
+	 * Finishs the sql query, executes it and returns array of Model objects
 	 * @return array
 	 */
 	public function list() {
 		return $this->getList();
+	}
+
+	/**
+	 * Finishs the sql query, executes it and returns array of row's arrays
+	 * @return array
+	 */
+	public function getArrayList() {
+		$result = array();
+		$rs = $this->exec();
+		while($row = $rs->fetch()) {
+			$result[] = $row;
+		}
+		return $result;
+	}
+
+	/**
+	 * Finishs the sql query, executes it and returns array of row's arrays
+	 * @return array
+	 */
+	public function arrayList() {
+		return $this->getArrayList();
 	}
 
 	/**
@@ -190,7 +211,8 @@ abstract class Model extends QueryBuilderAbstract {
 
 		if($this->exists) {
 			// если объект присутствует в БД, обновляем его
-			static::update(static::$tableName, $fields)->where(static::$primaryKey, '=', $this->$primaryKey)->exec();
+			$id = $fields[$primaryKey] ? $fields[$primaryKey] : $this->$primaryKey;
+			static::update(static::$tableName, $fields)->where(static::$primaryKey, '=', $id)->exec();
 		} else {
 			// иначе добавляем его в БД
 			$insertedId = static::insert(static::$tableName, $fields)->exec()->getInsertedId();
@@ -270,6 +292,15 @@ abstract class Model extends QueryBuilderAbstract {
 	 */
 	protected function onAfterSave(&$fields) {
 
+	}
+
+	/**
+	 * Returns get ID
+	 * @return mixed $id
+	 */
+	public function getId() {
+		$primaryKey = static::$primaryKey;
+		return $this->$primaryKey;
 	}
 
 	/**
