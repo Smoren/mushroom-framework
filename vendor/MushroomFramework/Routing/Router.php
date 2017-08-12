@@ -66,9 +66,9 @@ class Router {
 	}
 
 	// возвращает маршрут обработки ошибки по ее имени (Exception)
-	public function getError($name=false) {
-		if($name && isset(static::$errors[$name])) {
-			return static::$errors[$name];
+	public function getError($code=404) {
+		if(isset(static::$errors[$code])) {
+			return static::$errors[$code];
 		}
 		return false;
 	}
@@ -127,7 +127,7 @@ class Router {
 	public function handle() {
 		try {
 			if(!$this->controller) {
-				throw new Exceptions\NotFoundException("No route found");
+				throw new Exceptions\StatusException(404, "no route found");
 			} elseif(!class_exists($this->controller)) {
 				throw new Exceptions\RouteException("Class {$this->controller} not exists");
 			} elseif(!method_exists($this->controller, $this->action)) {
@@ -135,13 +135,20 @@ class Router {
 			}
 
 			$this->controllerInstance = new $this->controller($this->method);
-			return call_user_func_array(array($this->controllerInstance, $this->action), $this->data);
-		} catch(Exceptions\NotFoundException $e) {
-			if($route = static::getError('NotFound')) {
+			$response = call_user_func_array(array($this->controllerInstance, $this->action), $this->data);
+			if(!$response) {
+				throw new Exceptions\StatusException(404, 'no response found');
+			}
+
+			return $response;
+		} catch(Exceptions\StatusException $e) {
+			if($route = static::getError($e->getStatus())) {
 				$router = $this;
 				return $route->go($router);
 			}
-			throw new Exceptions\NotFoundException('no 404 handler');
+			$statusCode = 500;
+			http_response_code($statusCode);
+			throw new Exceptions\StatusException($statusCode, 'no handler for '.$e->getStatus());
 		}
 	}
 	
