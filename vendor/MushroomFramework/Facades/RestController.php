@@ -2,6 +2,7 @@
 
 namespace MushroomFramework\Facades;
 use \MushroomFramework\Routing\Controller;
+use \MushroomFramework\Database\Exceptions\ValidatorException;
 use \Exception;
 
 abstract class RestController extends Controller {
@@ -58,7 +59,15 @@ abstract class RestController extends Controller {
 		// TODO: научиться обрабатывать валидацию
 		$modelName = static::$modelName;
 		$item = new $modelName(Request::json());
-		$item->save();
+		try {
+			$item->save();
+		} catch(ValidatorException $e) {
+			Response::status(422);
+			return Response::json(array(
+				'error' => 'validation error',
+				'errorFields' => $e->getErrorFields(),
+			));
+		}
 		return Response::json($item->asArray());
 	}
 
@@ -81,7 +90,15 @@ abstract class RestController extends Controller {
 			return Response::json(array('error' => 'item not found'));
 		}
 		$item->set(Request::json());
-		$item->save();
+		try {
+			$item->save();
+		} catch(ValidatorException $e) {
+			Response::status(422);
+			return Response::json(array(
+				'error' => 'validation error',
+				'errorFields' => $e->getErrorFields(),
+			));
+		}
 		return Response::json($item->asArray());
 	}
 

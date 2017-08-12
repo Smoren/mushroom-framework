@@ -2,7 +2,7 @@
 
 namespace MushroomFramework\Database\Mysql;
 use MushroomFramework\Database;
-use \Exception;
+use MushroomFramework\Database\Exceptions\QueryException;
 
 /**
  * Mysql DatabaseManager Class
@@ -68,7 +68,7 @@ class DatabaseManager extends Database\DatabaseManager {
 	 */
 	public function query($queryString) {
 		$rs = mysqli_query($this->handle, $queryString);
-		if(!$rs) throw new Exception(mysqli_error($this->handle));
+		if(!$rs) throw new QueryException(mysqli_error($this->handle));
 		return new QueryResult($rs, $this->handle);
 	}
 

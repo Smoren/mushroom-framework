@@ -1,6 +1,7 @@
 <?php
 
 namespace MushroomFramework\Database;
+use MushroomFramework\Database\Exceptions\ValidatorException;
 use \Exception;
 
 /**
@@ -198,8 +199,7 @@ abstract class Model extends QueryBuilderAbstract {
 	 * Insert or update (depends of $this->exists) object as a row of model's table
 	 * @return $this
 	 */
-	public function save() {
-		// TODO: вставить валидацию, убрать ее из set()
+	public function save($validate=true) {
 		$primaryKey = static::$primaryKey;
 		$fields = array();
 		foreach(static::$fields as $fieldName) {
@@ -209,6 +209,13 @@ abstract class Model extends QueryBuilderAbstract {
 		}
 
 		$this->onBeforeSave($fields);
+
+		if($validate) {
+			$validator = $this->validate($fields);
+			if($validator->error()) {
+				throw new ValidatorException($validator->getErrorFields());
+			}
+		}
 
 		if($this->exists) {
 			// если объект присутствует в БД, обновляем его
@@ -253,7 +260,7 @@ abstract class Model extends QueryBuilderAbstract {
 	 * @param boolean $validate
 	 * @return Validator
 	 */
-	public function set(array $data, $validate=true) {
+	public function set(array $data, $validate=false) {
 		if(!$validate || $this->validate($data)->success()) {
 			foreach($data as $fieldName => $value) {
 				if(in_array($fieldName, static::$fields)) $this->$fieldName = $value;

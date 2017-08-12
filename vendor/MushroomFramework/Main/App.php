@@ -43,8 +43,13 @@ class App extends Singleton {
 	}
 
 	public static function showError($e) {
-		echo $e->getMessage();
-		echo '<pre>'; print_r($e); echo '</pre>';;
+		http_response_code(500);
+		if(static::gi()->config['debug']) {
+			echo $e->getMessage();
+			echo '<pre>'; print_r($e); echo '</pre>';
+		} else {
+			// TODO: выводить стандартную страницу 500
+		}
 	}
 
 	public function init() {

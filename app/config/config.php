@@ -3,6 +3,7 @@
 return array(
 	'database' => include('config.db.php'),
 	'defaultRouting' => false,
+	'debug' => true,
 	'classAliases' => array(
 		'App' => '\MushroomFramework\Facades\App',
 		'Route' => '\MushroomFramework\Facades\Route',
@@ -19,6 +20,7 @@ return array(
 		'Controller' => '\MushroomFramework\Routing\Controller',
 		'RestController' => '\MushroomFramework\Facades\RestController',
 		'Model' => '\MushroomFramework\Database\Model',
+		'UuidModel' => '\MushroomFramework\Models\UuidModel',
 		'View' => '\MushroomFramework\View\View',
 		'UserModel' => '\MushroomFramework\Models\User',
 	),

@@ -4,7 +4,7 @@ namespace MushroomFramework\Models;
 use MushroomFramework\Database\Model;
 use MushroomFramework\Pattern\Uuid;
 
-abstract class UUIDModel extends Model {
+abstract class UuidModel extends Model {
 	public static function find($id) {
 		if(!($id instanceof Uuid)) {
 			$id = new Uuid($id);

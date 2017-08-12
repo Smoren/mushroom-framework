@@ -39,6 +39,7 @@ class Validator {
 	 * @return $this
 	 */
 	public function validate($data) {
+		// TODO: ввести required
 		$this->reset();
 		foreach($data as $fieldName => $value) {
 			if(!in_array($fieldName, $this->fields)) continue;
@@ -77,6 +78,14 @@ class Validator {
 	 */
 	public function error() {
 		return !$this->success();
+	}
+
+	/**
+	 * Returns error fields' array
+	 * @return Array
+	 */
+	public function getErrorFields() {
+		return $this->errorFields;
 	}
 }
 
