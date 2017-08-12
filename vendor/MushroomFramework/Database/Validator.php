@@ -60,7 +60,7 @@ class Validator {
 			} else {
 				$isValid = preg_match($rule, $value);
 			}
-			if(!$isValid) $this->errorFields[$fieldName] = 1;
+			if(!$isValid && !isset($this->errorFields[$fieldName])) $this->errorFields[$fieldName] = 1;
 		}
 		return $this;
 	}
