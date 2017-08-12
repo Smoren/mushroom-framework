@@ -39,18 +39,28 @@ class Validator {
 	 * @return $this
 	 */
 	public function validate($data) {
-		// TODO: ввести required
 		$this->reset();
+
+		// проверим required
+		foreach($this->rules as $fieldName => $fieldRules) {
+			if($fieldRules['required']) {
+				if(!isset($data[$fieldName]) || !strlen($data[$fieldName])) {
+					$this->errorFields[$fieldName] = 0;
+				}
+			}
+		}
+
+		// теперь проверим правило
 		foreach($data as $fieldName => $value) {
 			if(!in_array($fieldName, $this->fields)) continue;
-			if(!isset($this->rules[$fieldName]) || !$this->rules[$fieldName]) continue;
-			$rule = $this->rules[$fieldName];
+			if(!isset($this->rules[$fieldName]['rule']) || !$this->rules[$fieldName]['rule']) continue;
+			$rule = $this->rules[$fieldName]['rule'];
 			if(is_callable($rule)) {
 				$isValid = $rule($value, $this);
 			} else {
 				$isValid = preg_match($rule, $value);
 			}
-			if(!$isValid) $this->errorFields[] = $fieldName;
+			if(!$isValid) $this->errorFields[$fieldName] = 1;
 		}
 		return $this;
 	}
