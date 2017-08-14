@@ -10,14 +10,8 @@ use \Exception;
 
 abstract class RestController extends Controller {
 	protected static $modelName;
-
-	function __call($methodName, $args=array()) {
-		if(is_callable(array($this, $methodName))) {
-			return call_user_func_array(array($this, $methodName), $args);
-		} else {
-			throw new Exception('In controller '.get_called_class().' method '.$methodName.' not found!');
-		}
-	}
+	protected static $filterFields = array();
+	protected static $orderFields = array();
 
 	public function collection() {
 		switch(Router::getMethod()) {
@@ -50,16 +44,24 @@ abstract class RestController extends Controller {
 		}
 	}
 
-	// TODO catch Exceptions on not Response object at main and make 404
-
 	public function list() {
 		$modelName = static::$modelName;
-		$list = $modelName::select()->getArrayList();
+		$query = $modelName::select();
+
+		$method = 'where';
+		foreach(static::$filterFields as $fieldName) {
+			$fieldValue = Request::get($fieldName, false);
+			if($fieldValue !== false) {
+				$query->$method($fieldName, '=', $fieldValue);
+				$method = 'andWhere';
+			}
+		}
+
+		$list = $query->getArrayList();
 		return Response::json($list);
 	}
 
 	public function create() {
-		// TODO: научиться обрабатывать валидацию
 		$modelName = static::$modelName;
 		$item = new $modelName(Request::json());
 		try {
@@ -85,7 +87,6 @@ abstract class RestController extends Controller {
 	}
 
 	public function update($id) {
-		// TODO: научиться обрабатывать валидацию
 		$modelName = static::$modelName;
 		$item = $modelName::find($id);
 		if(!$item) {
