@@ -18,10 +18,10 @@ return array(
 		'QueryBuilder' => '\MushroomFramework\Database\QueryBuilder',
 		'Event' => '\MushroomFramework\Facades\Event',
 		'Controller' => '\MushroomFramework\Routing\Controller',
-		'RestController' => '\MushroomFramework\Facades\RestController',
 		'Model' => '\MushroomFramework\Database\Model',
-		'UuidModel' => '\MushroomFramework\Models\UuidModel',
 		'View' => '\MushroomFramework\View\View',
-		'UserModel' => '\MushroomFramework\Models\User',
+		'UserModel' => '\MushroomFramework\Extensions\Models\User',
+		'UuidModel' => '\MushroomFramework\Extensions\Models\UuidModel',
+		'RestController' => '\MushroomFramework\Extensions\Controllers\RestController',
 	),
 );

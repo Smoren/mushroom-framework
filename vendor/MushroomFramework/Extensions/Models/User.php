@@ -1,6 +1,6 @@
 <?php
 
-namespace MushroomFramework\Models;
+namespace MushroomFramework\Extensions\Models;
 use MushroomFramework\Database\Model;
 use MushroomFramework\Facades\Cookie;
 use MushroomFramework\Facades\Session;

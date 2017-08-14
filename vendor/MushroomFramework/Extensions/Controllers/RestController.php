@@ -1,6 +1,9 @@
 <?php
 
-namespace MushroomFramework\Facades;
+namespace MushroomFramework\Extensions\Controllers;
+use \MushroomFramework\Facades\Router;
+use \MushroomFramework\Facades\Response;
+use \MushroomFramework\Facades\Request;
 use \MushroomFramework\Routing\Controller;
 use \MushroomFramework\Database\Exceptions\ValidatorException;
 use \Exception;
