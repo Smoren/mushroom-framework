@@ -30,9 +30,8 @@ class TestController extends Controller {
  	}
 
  	public function transfer() {
- 		return Router::transfer(false);
- 		return Router::transfer('Index@index');
- 		return Router::transfer('Index@detail', array('id' => 5));
+ 		// return Router::transfer('Index.index');
+ 		return Router::transfer('Index.detail', array('id' => 5));
 	}
 
  	public function model() {

@@ -34,7 +34,7 @@ Route::error(404, 'Error.notFound');
 Route::register('/', 'Index.index');
 Route::register('/news/{id}', 'Index.detail')->where(array(
 	'id' => '[0-9]+',
-));
+))->decorate('AccessManager', array('test' => 123));
 Route::register('/test/method', 'Test.method');
 Route::register('/test/transfer', 'Test.transfer');
 Route::register('/test/test', 'Test.test');

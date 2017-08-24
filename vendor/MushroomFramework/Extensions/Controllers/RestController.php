@@ -73,6 +73,7 @@ abstract class RestController extends Controller {
 				'errorFields' => $e->getErrorFields(),
 			));
 		}
+		Response::status(201);
 		return Response::json($item->asArray());
 	}
 

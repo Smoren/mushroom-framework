@@ -18,6 +18,7 @@ return array(
 		'QueryBuilder' => '\MushroomFramework\Database\QueryBuilder',
 		'Event' => '\MushroomFramework\Facades\Event',
 		'Controller' => '\MushroomFramework\Routing\Controller',
+		'ControllerDecorator' => '\MushroomFramework\Routing\ControllerDecorator',
 		'Model' => '\MushroomFramework\Database\Model',
 		'View' => '\MushroomFramework\View\View',
 		'UserModel' => '\MushroomFramework\Extensions\Models\User',

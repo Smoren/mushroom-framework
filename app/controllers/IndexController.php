@@ -10,7 +10,7 @@ class IndexController extends Controller {
  	public function detail($id) {
 		$item = News::find($id);
 		if(!$item) {
-			return Router::transfer(false);
+			return Router::transfer('Error.notFound');
 		}
 		return Response::view('example/index')
 			->with('news', array($item));

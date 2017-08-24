@@ -12,6 +12,8 @@ class Route {
 	protected $controller; // имя контроллера
 	protected $action; // имя действия
 	protected $data; // ассоциативный массив аргументов для action/callback
+	protected $decoratorClassName; // имя класса-декоратора
+	protected $decoratorParams; // имя декорирования
 	protected $args = array(); // имена аргументов для action/callback
 
 	// фабрика для создания и добавления маршрута в диспетчер (method=any)
@@ -75,17 +77,27 @@ class Route {
 		}
 	}
 
-	// запуск callback/Controller.action
+	// запуск Controller.action
 	public function go(Router $router) {
-		$router->setData($this->data);
-		if($this->callback instanceof \Closure) {
-			return call_user_func_array($this->callback, $this->data);
-		} else {
-			$router->setController($this->controller);
-			$router->setAction($this->action);
-			$router->setData($this->data);
-			return $router->handle();
+		$controllerName = $this->controller.'Controller';
+		try {
+			$controller = new $controllerName();
+		} catch (\Exception $e) {
+			throw new Exceptions\RouteException("Class {$this->controller} not exists");
 		}
+
+		if($this->decoratorClassName) {
+			$decoratorClassName = $this->decoratorClassName;
+			if(class_exists($decoratorClassName)) {
+				$decorator = new $decoratorClassName($controller, $this->decoratorParams);
+				if(!($decorator instanceof ControllerDecorator)) {
+					throw new \Exception("Wrong decorator {$decoratorClassName}");
+				}
+			}
+		} else {
+			$decorator = new ControllerDecorator($controller);
+		}
+		return $router->handle($decorator, $controller, $this->action, $this->data);
 	}
 
 	// возвращает контроллер
@@ -147,6 +159,13 @@ class Route {
 			$mask = str_replace("%$key%", '('.$val.')', $mask);
 		}
 		$this->regexp = $mask;
+		return $this;
+	}
+
+	// устанавливает декоратор
+	public function decorate($decoratorClassName, $decoratorParams=array()) {
+		$this->decoratorClassName = $decoratorClassName;
+		$this->decoratorParams = $decoratorParams;
 		return $this;
 	}
 }

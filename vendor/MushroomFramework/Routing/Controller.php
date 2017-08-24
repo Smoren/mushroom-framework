@@ -4,8 +4,8 @@ namespace MushroomFramework\Routing;
 use \Exception;
 
 class Controller {
-	function __construct($method) {
-		$this->method = $method;
+	function __construct() {
+		
 	}
 
 	public static function make($name) {
@@ -17,13 +17,5 @@ class Controller {
 		$classString = "<?php\n\nclass $className extends Controller {\n\tpublic function index() {\n\t\t\n\t}\n}";
 		file_put_contents(MUSHROOM_DIR_APP_CONTROLLERS.'/'.$fileName, $classString);
 		return $fileName;
-	}
-
-	function __call($methodName, $args=array()) {
-		if(is_callable(array($this, $methodName))) {
-			return call_user_func_array(array($this, $methodName), $args);
-		} else {
-			throw new Exception('In controller '.get_called_class().' method '.$methodName.' not found!');
-		}
 	}
 }

@@ -8,9 +8,6 @@ class Router {
 	protected static $routes = array();
 	protected static $routesTree = array();
 	protected static $errors = array();
-	protected $controller; // имя контроллера
-	protected $controllerInstance; // экземпляр используемого контроллера
-	protected $action; // имя дейтсвия
 	protected $method; // метод (get/post)
 	protected $uri; // строка запроса
 	protected $arUri = array(); // распарсированный запрос
@@ -88,30 +85,6 @@ class Router {
 		return strtoupper($this->method) === strtoupper($method);
 	}
 
-	// устанавливает действие
-	public function setAction($action) {
-		$this->action = $action;
-	}
-
-	// устанавливает контроллер
-	public function setController($controller) {
-		if($controller) {
-			$this->controller = "\\".\ucfirst($controller).'Controller';
-		} else {
-			$this->controller = false;
-		}
-	}
-
-	// устанавливает аргумент для передачи в action
-	public function setData(Array $data) {
-		$this->data = $data;
-	}
-
-	// возвращает данные
-	public function getData() {
-		return $this->data;
-	}
-
 	// принимает решение о маршрутизации, 
 	public function dispatch() {
 		// пробуем найти подходящий маршрут
@@ -124,18 +97,21 @@ class Router {
 	}
 
 	// обрабатывает ошибки перед выполнением или передачей управления
-	public function handle() {
+	public function handle($decorator, $controller, $actionName='', $data=array()) {
 		try {
-			if(!$this->controller) {
+			if(!$controller) {
 				throw new Exceptions\StatusException(404, "no route found");
-			} elseif(!class_exists($this->controller)) {
-				throw new Exceptions\RouteException("Class {$this->controller} not exists");
-			} elseif(!method_exists($this->controller, $this->action)) {
-				throw new Exceptions\RouteException("Method {$this->controller}::{$this->action}() not exists");
+			} elseif(!($controller instanceof Controller)) {
+				throw new Exceptions\RouteException("Controller object is not instance of Controller");
 			}
 
-			$this->controllerInstance = new $this->controller($this->method);
-			$response = call_user_func_array(array($this->controllerInstance, $this->action), $this->data);
+			if(!$decorator) {
+				$decorator = new ControllerDecorator($controller);
+			} elseif(!($decorator instanceof ControllerDecorator)) {
+				throw new Exceptions\RouteException("Controller decorator object is not instance of ControllerDecorator");
+			}
+
+			$response = call_user_func_array(array($decorator, $actionName), $data);
 			if(!$response) {
 				throw new Exceptions\StatusException(404, 'no response found');
 			}
@@ -153,14 +129,23 @@ class Router {
 	}
 	
 	// передача управления
-	public function transfer($where, $data=false) {
-		$arWhere = explode('.', $where);
-		$this->setController($arWhere[0]);
-		$this->setAction($arWhere[1]);
-		if(is_array($data)) {
-			$this->setData($data);
+	public function transfer($where, $data=array(), $decorator=null) {
+		// TODO переделать через поиск и запуск Route::go
+		foreach(static::$routes as &$route) {
+			if($route->getAddr() == $where) {
+				return $route->go($this);
+			}
 		}
-		return $this->handle();
+		foreach(static::$errors as &$route) {
+			if($route->getAddr() == $where) {
+				return $route->go($this);
+			}
+		}
+		throw new Exceptions\RouteException("Transfer error for {$where}");
+	}
+
+	public static function throwStatusException($code, $message) {
+		throw new Exceptions\StatusException($code, $message);
 	}
 
 	// парсит URI
