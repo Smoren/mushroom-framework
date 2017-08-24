@@ -18,10 +18,11 @@ class RouteCollection {
 	public function __call($methodName, $args=array()) {
 		foreach($this->collection as &$route) {
 			if(is_callable(array($route, $methodName))) {
-				return call_user_func_array(array($route, $methodName), $args);
+				call_user_func_array(array($route, $methodName), $args);
 			} else {
 				throw new \Exception(get_class($route).'::'.$methodName.' is not callable');
 			}
 		}
+		return $this;
 	}
 }
