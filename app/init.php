@@ -40,4 +40,4 @@ Route::register('/test/transfer', 'Test.transfer');
 Route::register('/test/test', 'Test.test');
 
 Route::rest('/rest/test', 'RestTest', '[0-9a-f\-]+');
-Route::rest('/rest/news', 'RestNews');
+Route::rest('/rest/news', 'RestNews')->decorate('AccessManager', array('test' => 123));;

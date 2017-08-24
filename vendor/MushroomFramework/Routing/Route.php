@@ -8,21 +8,20 @@ class Route {
 	protected $mask; // маска URI
 	protected $addr; // Controller.action
 	protected $regexp; // маска URI, преобразованная в regexp
-	protected $callback; // функция обратного вызова
 	protected $controller; // имя контроллера
 	protected $action; // имя действия
-	protected $data; // ассоциативный массив аргументов для action/callback
+	protected $data; // ассоциативный массив аргументов для action
 	protected $decoratorClassName; // имя класса-декоратора
 	protected $decoratorParams; // имя декорирования
-	protected $args = array(); // имена аргументов для action/callback
+	protected $args = array(); // имена аргументов для action
 
-	// фабрика для создания и добавления маршрута в диспетчер (method=any)
-	public static function register($mask, $callback) {
-		$route = new static($mask, $callback);
+	// фабрика для создания и добавления маршрута в диспетчер
+	public static function register($mask, $addr) {
+		$route = new static($mask, $addr);
 		return Router::addRoute($route);
 	}
 
-	// фабрика для создания и добавления маршрута в диспетчер (method=any)
+	// фабрика для создания и добавления маршрута в диспетчер
 	public static function rest($mask, $controllerName, $idRegExp='[0-9]+') {
 		$mask = preg_replace('/[\/]+$/', '', $mask);
 		
@@ -36,21 +35,21 @@ class Route {
 		$itemRoute->where(array(
 			'id' => $idRegExp,
 		));
-		return array(
+		return new RouteCollection(array(
 			'collection' => $collectionRoute,
 			'item' => $itemRoute,
-		);
+		));
 	}
 
 	// фабрика создания и добавления обработчика ошибок
-	public static function error($exceptionName, $callback) {
-		$route = new static(false, $callback);
+	public static function error($exceptionName, $addr) {
+		$route = new static(false, $addr);
 		return Router::addError($exceptionName, $route);
 	}
 
-	function __construct($mask, $callback) {
+	function __construct($mask, $addr) {
 		$this->setMask($mask);
-		$this->setCallback($callback);
+		$this->setAddr($addr);
 		$this->data = array();
 	}
 
@@ -65,16 +64,12 @@ class Route {
 		$this->regexp = '/^'.preg_quote($mask, '/').'[\/]{0,1}$/';
 	}
 
-	// устанавливает callback/Controller.action
-	public function setCallback($callback) {
-		if($callback instanceof \Closure) {
-			$this->callback = $callback;
-		} else {
-			$arCallback = explode('.', $callback);
-			$this->addr = $callback;
-			$this->controller = $arCallback[0];
-			$this->action = $arCallback[1];
-		}
+	// устанавливает Controller.action
+	public function setAddr($addr) {
+		$arAddr = explode('.', $addr);
+		$this->addr = $addr;
+		$this->controller = $arAddr[0];
+		$this->action = $arAddr[1];
 	}
 
 	// запуск Controller.action
