@@ -16,12 +16,18 @@ class ControllerDecorator {
 			throw new Exceptions\RouteException("ControllerDecorator ".get_called_class()." has no Controller to decorate");
 		}
 
-		$this->_onActionCall($methodName, $args);
+		if($r = $this->_onActionCall($methodName, $args)) {
+			return $r;
+		}
 		
 		if(is_callable(array($this->controller, $methodName))) {
-			$this->_onActionFound($methodName, $args);
+			if($r = $this->_onActionFound($methodName, $args)) {
+				return $r;
+			}
 			$response = call_user_func_array(array($this->controller, $methodName), $args);
-			$this->_onActionResponse($response);
+			if($r = $this->_onActionResponse($response)) {
+				return $r;
+			}
 			return $response;
 		} else {
 			throw new Exceptions\RouteException(get_class($this->controller).'::'.$methodName.' is not callable');

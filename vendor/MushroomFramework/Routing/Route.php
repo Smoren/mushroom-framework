@@ -86,7 +86,7 @@ class Route {
 			if(class_exists($decoratorClassName)) {
 				$decorator = new $decoratorClassName($controller, $this->decoratorParams);
 				if(!($decorator instanceof ControllerDecorator)) {
-					throw new \Exception("Wrong decorator {$decoratorClassName}");
+					throw new \Exception("Wrong ControllerDecorator {$decoratorClassName}");
 				}
 			}
 		} else {
@@ -139,6 +139,7 @@ class Route {
 
 	// проверяет, подходит ли переданный URI под маску маршрута, собирает аргументы для callback/Controller.action
 	public function check($uri) {
+		// TODO: data в отдельный метод
 		preg_match($this->regexp, $uri, $matches);
 		if(!sizeof($matches)) return false;
 		for($i=1; $i<sizeof($matches); $i++) {
