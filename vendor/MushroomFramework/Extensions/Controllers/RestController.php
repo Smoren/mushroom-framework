@@ -12,18 +12,22 @@ abstract class RestController extends Controller {
 	protected static $modelName;
 	protected static $filterFields = array();
 	protected static $orderFields = array();
+	protected static $messageMethodNotaAllowed = 'method not allowed';
+	protected static $messageItemNotFound = 'item not found';
+	protected static $messageValidationError = 'validation error';
 
+	// TODO передавать в переопределяемые методы параметры
 	public function collection() {
 		switch(Router::getMethod()) {
 			case 'GET':
-				return $this->list();
+				return $this->list(static::$filterFields);
 				break;
 			case 'POST':
-				return $this->create();
+				return $this->create(Request::json());
 				break;
 			default:
 				Response::status(405);
-				return Response::json(array('error' => 'method not allowed'));
+				return Response::json(array('error' => static::$messageMethodNotaAllowed));
 		}
 	}
 
@@ -33,23 +37,23 @@ abstract class RestController extends Controller {
 				return $this->detail($id);
 				break;
 			case 'PUT':
-				return $this->update($id);
+				return $this->update($id, Request::json());
 				break;
 			case 'DELETE':
 				return $this->remove($id);
 				break;
 			default:
 				Response::status(405);
-				return Response::json(array('error' => 'method not allowed'));
+				return Response::json(array('error' => static::$messageMethodNotaAllowed));
 		}
 	}
 
-	public function list() {
+	protected function list($filterFields=array()) {
 		$modelName = static::$modelName;
 		$query = $modelName::select();
 
 		$method = 'where';
-		foreach(static::$filterFields as $fieldName) {
+		foreach($filterFields as $fieldName) {
 			$fieldValue = Request::get($fieldName, false);
 			if($fieldValue !== false) {
 				$query->$method($fieldName, '=', $fieldValue);
@@ -61,15 +65,15 @@ abstract class RestController extends Controller {
 		return Response::json($list);
 	}
 
-	public function create() {
+	protected function create($data=array()) {
 		$modelName = static::$modelName;
-		$item = new $modelName(Request::json());
+		$item = new $modelName($data);
 		try {
 			$item->save();
 		} catch(ValidatorException $e) {
 			Response::status(422);
 			return Response::json(array(
-				'error' => 'validation error',
+				'error' => static::$messageValidationError,
 				'errorFields' => $e->getErrorFields(),
 			));
 		}
@@ -77,42 +81,42 @@ abstract class RestController extends Controller {
 		return Response::json($item->asArray());
 	}
 
-	public function detail($id) {
+	protected function detail($id) {
 		$modelName = static::$modelName;
 		$item = $modelName::find($id);
 		if(!$item) {
 			Response::status(404);
-			return Response::json(array('error' => 'item not found'));
+			return Response::json(array('error' => static::$messageItemNotFound));
 		}
 		return Response::json($item->asArray());
 	}
 
-	public function update($id) {
+	protected function update($id, $data=array()) {
 		$modelName = static::$modelName;
 		$item = $modelName::find($id);
 		if(!$item) {
 			Response::status(404);
-			return Response::json(array('error' => 'item not found'));
+			return Response::json(array('error' => static::$messageItemNotFound));
 		}
-		$item->set(Request::json());
+		$item->set($data);
 		try {
 			$item->save();
 		} catch(ValidatorException $e) {
 			Response::status(422);
 			return Response::json(array(
-				'error' => 'validation error',
+				'error' => static::$messageValidationError,
 				'errorFields' => $e->getErrorFields(),
 			));
 		}
 		return Response::json($item->asArray());
 	}
 
-	public function remove($id) {
+	protected function remove($id) {
 		$modelName = static::$modelName;
 		$item = $modelName::find($id);
 		if(!$item) {
 			Response::status(404);
-			return Response::json(array('error' => 'item not found'));
+			return Response::json(array('error' => static::$messageItemNotFound));
 		}
 		$item->remove();
 		return Response::json(null);
