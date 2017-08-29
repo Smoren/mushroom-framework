@@ -6,7 +6,6 @@ use \MushroomFramework\Facades\Response;
 use \MushroomFramework\Facades\Request;
 use \MushroomFramework\Routing\Controller;
 use \MushroomFramework\Database\Exceptions\ValidatorException;
-use \Exception;
 
 abstract class RestController extends Controller {
 	protected static $modelName;
