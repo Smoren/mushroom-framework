@@ -47,6 +47,13 @@ abstract class RestController extends Controller {
 	}
 
 	// TODO идея реализации фильтра и сортировки: '~name' => array('LIKE', 'name'), 'id' => array('=')
+	// массивы $filterFields и $orderFields приводятся в единообразную структуру в конструкторе RestController
+	// идти по выражению со скобками и сразу в процессе транслировать в QB-запрос
+	// посимвольно проверяем, не экранирован ли очередной символб но только для получения значений
+	// экранировать необходимо символ [']
+	// filter: id>10&(title~'my~name%'|text~'my~name%')
+	// на тогда требуется валидация запроса: введем счетчик скобок, должен быть = 0 на выходе
+	// если хотя бы один из параметров не найден, возвращаем ошибку (все норм, ибо в отдельной переменной)
 	protected function list($params=array(), $filterFields=null, $orderFields=null) {
 		if(!$filterFields) $filterFields = static::$filterFields;
 		if(!$orderFields) $orderFields = static::$orderFields;
