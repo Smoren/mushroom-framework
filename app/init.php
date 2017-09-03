@@ -39,5 +39,5 @@ Route::register('/test/method', 'Test.method');
 Route::register('/test/transfer', 'Test.transfer');
 Route::register('/test/test', 'Test.test');
 
-Route::rest('/rest/test', 'RestTest', '[0-9a-f\-]+');
-Route::rest('/rest/news', 'RestNews')->decorate('AccessManager', array('test' => 123));;
+Route::rest('/rest/test', 'Rest\Test', '[0-9a-f\-]+');
+Route::rest('/rest/news', 'Rest\News')->decorate('AccessManager', array('test' => 123));
