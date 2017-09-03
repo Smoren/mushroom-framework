@@ -2,7 +2,7 @@
 
 namespace Rest;
 use \MushroomFramework\Pattern\Uuid;
-use MushroomFramework\Extensions\Controllers\RestController;
+use \MushroomFramework\Extensions\Controllers\RestController;
 
 class NewsController extends RestController {
  	protected static $modelName = 'News';
