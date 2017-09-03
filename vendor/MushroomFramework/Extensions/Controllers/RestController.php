@@ -11,22 +11,21 @@ abstract class RestController extends Controller {
 	protected static $modelName;
 	protected static $filterFields = array();
 	protected static $orderFields = array();
-	protected static $messageMethodNotaAllowed = 'method not allowed';
+	protected static $messageMethodNotAllowed = 'method not allowed';
 	protected static $messageItemNotFound = 'item not found';
 	protected static $messageValidationError = 'validation error';
 
-	// TODO передавать в переопределяемые методы параметры
 	public function collection() {
 		switch(Router::getMethod()) {
 			case 'GET':
-				return $this->list(static::$filterFields);
+				return $this->list(Request::get());
 				break;
 			case 'POST':
 				return $this->create(Request::json());
 				break;
 			default:
 				Response::status(405);
-				return Response::json(array('error' => static::$messageMethodNotaAllowed));
+				return Response::json(array('error' => static::$messageMethodNotAllowed));
 		}
 	}
 
@@ -43,18 +42,21 @@ abstract class RestController extends Controller {
 				break;
 			default:
 				Response::status(405);
-				return Response::json(array('error' => static::$messageMethodNotaAllowed));
+				return Response::json(array('error' => static::$messageMethodNotAllowed));
 		}
 	}
 
-	protected function list($filterFields=array()) {
+	// TODO идея реализации фильтра и сортировки: '~name' => array('LIKE', 'name'), 'id' => array('=')
+	protected function list($params=array(), $filterFields=null, $orderFields=null) {
+		if(!$filterFields) $filterFields = static::$filterFields;
+		if(!$orderFields) $orderFields = static::$orderFields;
+
 		$modelName = static::$modelName;
 		$query = $modelName::select();
 
 		$method = 'where';
-		foreach($filterFields as $fieldName) {
-			$fieldValue = Request::get($fieldName, false);
-			if($fieldValue !== false) {
+		foreach($params as $fieldName => $fieldValue) {
+			if(in_array($fieldName, $filterFields)) {
 				$query->$method($fieldName, '=', $fieldValue);
 				$method = 'andWhere';
 			}
