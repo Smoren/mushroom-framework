@@ -563,6 +563,13 @@ abstract class QueryBuilderAbstract {
 		return "'".static::shield($str)."'";
 	}
 
+	/**
+	 * Makes where-conditions from string like colname1=value1&(colname2~value2|colname3>value3)
+	 * @param string $filterString
+	 * @param array $filterFields
+	 * @param array $filterOperators
+	 * @return QueryBuilder
+	 */
 	public function parseFilter($filterString='', $filterFields=array(), $filterOperators=array()) {
 		if(!strlen($filterString)) return $this;
 
@@ -644,8 +651,8 @@ abstract class QueryBuilderAbstract {
 
 						if(!isset($filterFields[$fieldName])) {
 							throw new QueryBuilderException('forbidden filter field');
-						} elseif(in_array($operator, $filterFields[$fieldName])) {
-							throw new QueryBuilderException('forbidden filter field operator');
+						} elseif(!in_array($operator, $filterFields[$fieldName])) {
+							throw new QueryBuilderException('forbidden filter field operator ');
 						}
 
 						if(!$operators[$operator]) {
@@ -675,6 +682,12 @@ abstract class QueryBuilderAbstract {
 		return $this;
 	}
 
+	/**
+	 * Makes order-conditions from string like colname1:asc,colname2:desc
+	 * @param string $orderString
+	 * @param array $orderFields
+	 * @return QueryBuilder
+	 */
 	public function parseOrder($orderString='', $orderFields=array()) {
 		if(!strlen($orderString)) return $this;
 
