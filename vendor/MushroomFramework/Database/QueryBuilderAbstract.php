@@ -1,7 +1,7 @@
 <?php
 
 namespace MushroomFramework\Database;
-use \Exception;
+use MushroomFramework\Database\Exceptions\QueryBuilderException;
 
 /**
  * QueryBuilderAbstract Class
@@ -561,5 +561,137 @@ abstract class QueryBuilderAbstract {
 	 */
 	public static function formatValue($str) {
 		return "'".static::shield($str)."'";
+	}
+
+	public function parseFilter($filterString='', $filterFields=array(), $filterOperators=array()) {
+		if(!strlen($filterString)) return $this;
+
+		$operators = array(
+			'=' => '=',
+			'>' => '>',
+			'<' => '<',
+			'>=' => '>=',
+			'<=' => '<=',
+			'!=' => 'IS NOT',
+			'~' => 'LIKE',
+		);
+
+		$this->addToQuery("WHERE");
+		$this->startBracketOperation();
+		$this->startBracketOperation();
+		
+		$bracketsLevel = 0;
+		while(strlen($filterString)) {
+			$skipChars = 1;
+
+			switch($filterString[0]) {
+				case '(':
+					$bracketsLevel++;
+					$this->startBracketOperation();
+					break;
+				case ')':
+					$bracketsLevel--;
+					$this->endBracketOperation();
+					break;
+				case '&':
+					if(!in_array('AND', $filterOperators)) {
+						throw new QueryBuilderException('forbidden logic operator');
+					}
+					$this->addToQuery("AND");
+					break;
+				case '|':
+					if(!in_array('OR', $filterOperators)) {
+						throw new QueryBuilderException('forbidden logic operator');
+					}
+					$this->addToQuery("OR");
+					break;
+				default:
+					if(preg_match("/^([a-zA-Z0-9_]+)([\=\>\<\~\!][\=]{0,1})([0-9]*)/", $filterString, $matches)) {
+						$filterString = substr($filterString, strlen($matches[0]));
+						$fieldName = $matches[1];
+						$operator = $matches[2];
+						$fieldValue = '';
+
+						if($matches[3]) {
+							$fieldValue = $matches[3];
+						} else {
+							if($filterString[0] !== "'") {
+								throw new QueryBuilderException('start quote reqiured');
+							} else {
+								$filterString = substr($filterString, 1);
+							}
+
+							$endQuoteFound = false;
+							while(strlen($filterString)) {
+								$skipChars = 1;
+								if($filterString[0] == "\\") {
+									$fieldValue .= $filterString[1];
+									$skipChars = 2;
+								} elseif($filterString[0] == "'") {
+									$endQuoteFound = true;
+									$filterString = substr($filterString, $skipChars);
+									break;
+								} else {
+									$fieldValue .= $filterString[0];
+								}
+
+								$filterString = substr($filterString, $skipChars);
+							}
+							if(!$endQuoteFound) {
+								throw new QueryBuilderException('end quote reqiured');
+							}
+						}
+
+						if(!isset($filterFields[$fieldName])) {
+							throw new QueryBuilderException('forbidden filter field');
+						} elseif(in_array($operator, $filterFields[$fieldName])) {
+							throw new QueryBuilderException('forbidden filter field operator');
+						}
+
+						if(!$operators[$operator]) {
+							throw new QueryBuilderException('bad operator');
+						} else {
+							$operator = $operators[$operator];
+						}
+
+						$this->condition($fieldName, $operator, $fieldValue);
+					} else {
+						throw new QueryBuilderException('bad condition');
+					}
+					$skipChars = 0;
+					break;
+			}
+
+			if($skipChars) $filterString = substr($filterString, $skipChars);
+		}
+
+		if($bracketsLevel) {
+			throw new QueryBuilderException('bad brackets');
+		}
+	
+		$this->endBracketOperation();
+		$this->endBracketOperation();
+
+		return $this;
+	}
+
+	public function parseOrder($orderString='', $orderFields=array()) {
+		if(!strlen($orderString)) return $this;
+
+		$orders = explode(',', $orderString);
+		$orderBy = array();
+		foreach($orders as $order) {
+			if(!preg_match('/^([a-zA-Z0-9_]+)\:(asc|desc)$/', $order, $matches)) {
+				throw new QueryBuilderException('bad order expression');
+			} elseif(!isset($orderFields[$matches[1]])) {
+				throw new QueryBuilderException('forbidden order field');
+			} elseif(!in_array(strtoupper($matches[2]), $orderFields[$matches[1]])) {
+				throw new QueryBuilderException('forbidden order field operator');
+			} else {
+				$orderBy[$matches[1]] = $matches[2];
+			}
+		}
+
+		return $this->orderBy($orderBy);
 	}
 }

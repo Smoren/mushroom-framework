@@ -6,10 +6,12 @@ use \MushroomFramework\Facades\Response;
 use \MushroomFramework\Facades\Request;
 use \MushroomFramework\Routing\Controller;
 use \MushroomFramework\Database\Exceptions\ValidatorException;
+use MushroomFramework\Database\Exceptions\QueryBuilderException;
 
 abstract class RestController extends Controller {
 	protected static $modelName;
 	protected static $filterFields = array();
+	protected static $filterOperators = array();
 	protected static $orderFields = array();
 	protected static $messageMethodNotAllowed = 'method not allowed';
 	protected static $messageItemNotFound = 'item not found';
@@ -18,7 +20,10 @@ abstract class RestController extends Controller {
 	public function collection() {
 		switch(Router::getMethod()) {
 			case 'GET':
-				return $this->list(Request::get());
+				$params = Request::get();
+				if(!isset($params['filter'])) $params['filter'] = array();
+				if(!isset($params['order'])) $params['order'] = array();
+				return $this->list($params, static::$filterFields, static::$filterOperators, static::$orderFields);
 				break;
 			case 'POST':
 				return $this->create(Request::json());
@@ -46,27 +51,18 @@ abstract class RestController extends Controller {
 		}
 	}
 
-	// TODO идея реализации фильтра и сортировки: '~name' => array('LIKE', 'name'), 'id' => array('=')
-	// массивы $filterFields и $orderFields приводятся в единообразную структуру в конструкторе RestController
-	// идти по выражению со скобками и сразу в процессе транслировать в QB-запрос
-	// посимвольно проверяем, не экранирован ли очередной символб но только для получения значений
-	// экранировать необходимо символ [']
 	// filter: id>10&(title~'my~name%'|text~'my~name%')
-	// на тогда требуется валидация запроса: введем счетчик скобок, должен быть = 0 на выходе
-	// если хотя бы один из параметров не найден, возвращаем ошибку (все норм, ибо в отдельной переменной)
-	protected function list($params=array(), $filterFields=null, $orderFields=null) {
-		if(!$filterFields) $filterFields = static::$filterFields;
-		if(!$orderFields) $orderFields = static::$orderFields;
-
+	// order: name:asc,text:desc
+	protected function list($params=array('filter' => array(), 'order' => array()), $filterFields=array(), $filterOperators=array(), $orderFields=array()) {
 		$modelName = static::$modelName;
-		$query = $modelName::select();
 
-		$method = 'where';
-		foreach($params as $fieldName => $fieldValue) {
-			if(in_array($fieldName, $filterFields)) {
-				$query->$method($fieldName, '=', $fieldValue);
-				$method = 'andWhere';
-			}
+		try {
+			$query = $modelName::select()
+				->parseFilter($params['filter'], $filterFields, $filterOperators)
+				->parseOrder($params['order'], $orderFields);
+		} catch(QueryBuilderException $e) {
+			Response::status(422);
+			return Response::json(array('error' => $e->getMessage()));
 		}
 
 		$list = $query->getArrayList();
