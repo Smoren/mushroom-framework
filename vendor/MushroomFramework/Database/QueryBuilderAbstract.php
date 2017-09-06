@@ -707,4 +707,35 @@ abstract class QueryBuilderAbstract {
 
 		return $this->orderBy($orderBy);
 	}
+
+	/**
+	 * Makes limit-condition from params array like array('limit' => 10, 'page' => 2)
+	 * @param array $params
+	 * @return QueryBuilder
+	 */
+	public function parseLimit($params) {
+		if(isset($params['limit'])) {
+			$limit = intval($params['limit']);
+			if($maxListLimit && ($limit > $maxListLimit || $limit < 0)) {
+				throw new QueryBuilderException('bad limit');
+			}
+			if(isset($params['page'])) {
+				$page = intval($params['page']);
+				if($page < 0) {
+					throw new QueryBuilderException('bad page');
+				}
+				$this->limit($page*$limit, $limit);
+			} else {
+				$this->limit($limit);
+			}
+		} elseif(isset($params['page']) && $maxListLimit) {
+			$page = intval($params['page']);
+			if($page < 0) {
+				throw new QueryBuilderException('bad page');
+			}
+			$this->limit($page*$maxListLimit, $maxListLimit);
+		}
+
+		return $this;
+	}
 }

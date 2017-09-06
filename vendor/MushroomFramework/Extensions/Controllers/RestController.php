@@ -13,6 +13,7 @@ abstract class RestController extends Controller {
 	protected static $filterFields = array();
 	protected static $filterOperators = array();
 	protected static $orderFields = array();
+	protected static $maxListLimit = 0;
 	protected static $messageMethodNotAllowed = 'method not allowed';
 	protected static $messageItemNotFound = 'item not found';
 	protected static $messageValidationError = 'validation error';
@@ -23,7 +24,7 @@ abstract class RestController extends Controller {
 				$params = Request::get();
 				if(!isset($params['filter'])) $params['filter'] = array();
 				if(!isset($params['order'])) $params['order'] = array();
-				return $this->list($params, static::$filterFields, static::$filterOperators, static::$orderFields);
+				return $this->list($params, static::$filterFields, static::$filterOperators, static::$orderFields, static::$maxListLimit);
 				break;
 			case 'POST':
 				return $this->create(Request::json());
@@ -51,15 +52,14 @@ abstract class RestController extends Controller {
 		}
 	}
 
-	// filter: id>10&(title~'my~name%'|text~'my~name%')
-	// order: name:asc,text:desc
-	protected function list($params=array('filter' => array(), 'order' => array()), $filterFields=array(), $filterOperators=array(), $orderFields=array()) {
+	protected function list($params=array('filter' => array(), 'order' => array()), $filterFields=array(), $filterOperators=array(), $orderFields=array(), $maxListLimit=false) {
 		$modelName = static::$modelName;
 
 		try {
 			$query = $modelName::select()
 				->parseFilter($params['filter'], $filterFields, $filterOperators)
-				->parseOrder($params['order'], $orderFields);
+				->parseOrder($params['order'], $orderFields)
+				->parseLimit($params);
 		} catch(QueryBuilderException $e) {
 			Response::status(422);
 			return Response::json(array('error' => $e->getMessage()));
