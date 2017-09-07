@@ -579,7 +579,7 @@ abstract class QueryBuilderAbstract {
 			'<' => '<',
 			'>=' => '>=',
 			'<=' => '<=',
-			'!=' => 'IS NOT',
+			'!=' => '<>',
 			'~' => 'LIKE',
 		);
 

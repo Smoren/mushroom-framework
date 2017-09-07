@@ -13,6 +13,7 @@ abstract class RestController extends Controller {
 	protected static $filterFields = array();
 	protected static $filterOperators = array();
 	protected static $orderFields = array();
+	// TODO не работает без limit param
 	protected static $maxListLimit = 0;
 	protected static $messageMethodNotAllowed = 'method not allowed';
 	protected static $messageItemNotFound = 'item not found';
