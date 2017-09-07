@@ -655,7 +655,7 @@ abstract class QueryBuilderAbstract {
 							throw new QueryBuilderException('forbidden filter field operator ');
 						}
 
-						if(!$operators[$operator]) {
+						if(!isset($operators[$operator])) {
 							throw new QueryBuilderException('bad operator');
 						} else {
 							$operator = $operators[$operator];
