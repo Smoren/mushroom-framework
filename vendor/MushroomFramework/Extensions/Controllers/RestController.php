@@ -13,7 +13,6 @@ abstract class RestController extends Controller {
 	protected static $filterFields = array();
 	protected static $filterOperators = array();
 	protected static $orderFields = array();
-	// TODO не работает без limit param
 	protected static $maxListLimit = 0;
 	protected static $messageMethodNotAllowed = 'method not allowed';
 	protected static $messageItemNotFound = 'item not found';
@@ -57,6 +56,9 @@ abstract class RestController extends Controller {
 		$modelName = static::$modelName;
 
 		try {
+			if(!isset($params['limit']) && static::$maxListLimit) {
+				$params['limit'] = static::$maxListLimit;
+			}
 			$query = $modelName::select()
 				->parseFilter($params['filter'], $filterFields, $filterOperators)
 				->parseOrder($params['order'], $orderFields)
