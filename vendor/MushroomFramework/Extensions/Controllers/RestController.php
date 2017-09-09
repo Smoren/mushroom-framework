@@ -64,7 +64,7 @@ abstract class RestController extends Controller {
 				->parseOrder($params['order'], $orderFields)
 				->parseLimit($params);
 		} catch(QueryBuilderException $e) {
-			Response::status(422);
+			Response::status(406);
 			return Response::json(array('error' => $e->getMessage()));
 		}
 
