@@ -6,11 +6,11 @@ use MushroomFramework\Facades\Cookie;
 use MushroomFramework\Facades\Session;
 
 abstract class User extends Model {
-	const ROW_ID = 'id';
-	const ROW_LOGIN = 'email';
-	const ROW_PASSWORD = 'password';
-	const ROW_HASH_AUTH = 'hashAuth';
-	const ROW_HASH_RESTORE = 'hashRestore';
+	const COLUMN_ID = 'id';
+	const COLUMN_LOGIN = 'email';
+	const COLUMN_PASSWORD = 'password';
+	const COLUMN_HASH_AUTH = 'hashAuth';
+	const COLUMN_HASH_RESTORE = 'hashRestore';
 	const COOKIE_ID = 'userId';
 	const COOKIE_HASH_AUTH = 'userHashAuth';
 	const SESSION_KEY = 'user';
@@ -20,7 +20,7 @@ abstract class User extends Model {
 	public static function login($login=null, $password=null, $remember=false, $checkOnly=false) {
 		static::$error = false;
 		$password = static::encryptPassword($password);
-		$user = static::select()->where(static::ROW_LOGIN, '=', $login)->andWhere(static::ROW_PASSWORD, '=', $password)->getFirst();
+		$user = static::select()->where(static::COLUMN_LOGIN, '=', $login)->andWhere(static::COLUMN_PASSWORD, '=', $password)->getFirst();
 		if(!$user) {
 			static::$error = 'INCORRECT_LOGIN_OR_PASSWORD';
 			return false;
@@ -41,15 +41,15 @@ abstract class User extends Model {
 		}
 
 		$sessionUser = Session::get(static::SESSION_KEY, false);
-		$sessionUserId = isset($sessionUser[static::ROW_ID]) ? $sessionUser[static::ROW_ID] : false;
-		$sessionUserHashAuth = isset($sessionUser[static::ROW_HASH_AUTH]) ? $sessionUser[static::ROW_HASH_AUTH] : false;
+		$sessionUserId = isset($sessionUser[static::COLUMN_ID]) ? $sessionUser[static::COLUMN_ID] : false;
+		$sessionUserHashAuth = isset($sessionUser[static::COLUMN_HASH_AUTH]) ? $sessionUser[static::COLUMN_HASH_AUTH] : false;
 		if($sessionUserId && $sessionUserId === $cookieUserId && $sessionUserHashAuth == $cookieUserHashAuth) {
 			$user = new static($sessionUser);
 			$user->exists = true;
 			return $user;
 		}
 
-		$user = static::select()->where(static::$primaryKey, '=', $cookieUserId)->andWhere(static::ROW_HASH_AUTH, '=', $cookieUserHashAuth)->getFirst();
+		$user = static::select()->where(static::$primaryKey, '=', $cookieUserId)->andWhere(static::COLUMN_HASH_AUTH, '=', $cookieUserHashAuth)->getFirst();
 		if(!$user) {
 			static::$error = 'INCORRECT_AUTH_COOKIE';
 			return false;
@@ -67,25 +67,25 @@ abstract class User extends Model {
 			return false;
 		}
 
-		$login = isset($data[static::ROW_LOGIN]) ? $data[static::ROW_LOGIN] : '';
+		$login = isset($data[static::COLUMN_LOGIN]) ? $data[static::COLUMN_LOGIN] : '';
 		if(!$login) {
 			static::$error = 'REGISTER_NO_LOGIN';
 			return false;
 		}
 
-		$found = static::findBy(static::ROW_LOGIN, $login)->getFirst();
+		$found = static::findBy(static::COLUMN_LOGIN, $login)->getFirst();
 		if($found) {
 			static::$error = 'REGISTER_DUBLICATE_USER';
 			return false;
 		}
 		
-		$password = isset($data[static::ROW_PASSWORD]) ? $data[static::ROW_PASSWORD] : '';
+		$password = isset($data[static::COLUMN_PASSWORD]) ? $data[static::COLUMN_PASSWORD] : '';
 		if(!$password) {
 			static::$error = 'REGISTER_NO_PASSWORD';
 			return false;
 		}
 
-		$user->{static::ROW_HASH_RESTORE} = static::makeHash();
+		$user->{static::COLUMN_HASH_RESTORE} = static::makeHash();
 		$user->save();
 		return $user;
 	}
@@ -109,7 +109,7 @@ abstract class User extends Model {
 	
 	public function auth($remember) {
 		$time = $remember ? null : static::AUTH_TIME;
-		$rowHashAuth = $this->{static::ROW_HASH_AUTH} = static::makeHash();
+		$rowHashAuth = $this->{static::COLUMN_HASH_AUTH} = static::makeHash();
 		$this->save();
 		Cookie::set(static::COOKIE_ID, $this->id, $time);
 		Cookie::set(static::COOKIE_HASH_AUTH, $rowHashAuth, $time);
@@ -119,9 +119,9 @@ abstract class User extends Model {
 
 	public function set(array $data, $validate=true) {
 		foreach($data as $key => &$val) {
-			if(in_array($key, array(static::ROW_HASH_AUTH, static::ROW_HASH_RESTORE))) {
+			if(in_array($key, array(static::COLUMN_HASH_AUTH, static::COLUMN_HASH_RESTORE))) {
 				unset($data[$key]);
-			} elseif($key == static::ROW_PASSWORD) {
+			} elseif($key == static::COLUMN_PASSWORD) {
 				$val = static::encryptPassword($val);
 			}
 		}
