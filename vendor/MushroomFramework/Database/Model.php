@@ -11,14 +11,14 @@ use \Exception;
  */
 abstract class Model extends QueryBuilderAbstract {
 	/**
-	 * @var string $tableName Name of the model's table
+	 * @const string TABLE_NAME Name of the model's table
 	 */
-	protected static $tableName;
+	const TABLE_NAME = '';
 	
 	/**
-	 * @var string $primaryKey Name primary key
+	 * @const string PRIMARY_KEY Name primary key
 	 */
-	protected static $primaryKey = 'id';
+	const PRIMARY_KEY = 'id';
 
 	/**
 	 * @var array $fields array of row's fields
@@ -87,7 +87,7 @@ abstract class Model extends QueryBuilderAbstract {
 		if(is_file(MUSHROOM_DIR_APP_MODELS.'/'.$fileName)) {
 			throw new Exception("file '$fileName' already exists");
 		}
-		$classString = "<?php\n\nclass $className extends Model {\n\tprotected static \$tableName = '$tableName';\n\tprotected static \$fields = array('id');\n\n\tpublic static function validation() {\n\t\treturn array();\n\t}\n}";
+		$classString = "<?php\n\nclass $className extends Model {\n\tconst \$TABLE_NAME = '$tableName';\n\tprotected static \$fields = array('id');\n\n\tpublic static function validation() {\n\t\treturn array();\n\t}\n}";
 		file_put_contents(MUSHROOM_DIR_APP_MODELS.'/'.$fileName, $classString);
 		return $fileName;
 	}
@@ -106,7 +106,7 @@ abstract class Model extends QueryBuilderAbstract {
 	 * @return mixed (false or Model)
 	 */
 	public static function find($id) {
-		$row = static::select()->where(static::$primaryKey, '=', $id)->exec()->fetch();
+		$row = static::select()->where(static::PRIMARY_KEY, '=', $id)->exec()->fetch();
 		if(!$row) return false;
 		return new static($row, true);
 	}
@@ -129,10 +129,10 @@ abstract class Model extends QueryBuilderAbstract {
 	 */
 	public static function select(...$fields) {
 		if(!sizeof($fields)) $fields = array('*');
-		// if(!in_array("*", $fields) && !in_array(static::$tableName.".*", $fields)) {
-		// 	$fields[] = static::$tableName.".*";
+		// if(!in_array("*", $fields) && !in_array(static::TABLE_NAME.".*", $fields)) {
+		// 	$fields[] = static::TABLE_NAME.".*";
 		// }
-		return parent::select(...$fields)->from(static::$tableName);
+		return parent::select(...$fields)->from(static::TABLE_NAME);
 	}
 
 	/**
@@ -200,7 +200,7 @@ abstract class Model extends QueryBuilderAbstract {
 	 * @return $this
 	 */
 	public function save($validate=true) {
-		$primaryKey = static::$primaryKey;
+		$primaryKey = static::PRIMARY_KEY;
 		$fields = array();
 		foreach(static::$fields as $fieldName) {
 			if(isset($this->$fieldName)) {
@@ -220,10 +220,10 @@ abstract class Model extends QueryBuilderAbstract {
 		if($this->exists) {
 			// если объект присутствует в БД, обновляем его
 			$id = $fields[$primaryKey] ? $fields[$primaryKey] : $this->$primaryKey;
-			static::update(static::$tableName, $fields)->where(static::$primaryKey, '=', $id)->exec();
+			static::update(static::TABLE_NAME, $fields)->where(static::PRIMARY_KEY, '=', $id)->exec();
 		} else {
 			// иначе добавляем его в БД
-			$insertedId = static::insert(static::$tableName, $fields)->exec()->getInsertedId();
+			$insertedId = static::insert(static::TABLE_NAME, $fields)->exec()->getInsertedId();
 			if($insertedId) $this->$primaryKey = $insertedId;
 			$this->exists = true;
 		}
@@ -239,10 +239,10 @@ abstract class Model extends QueryBuilderAbstract {
 	 */
 	public function remove($tableName=false) {
 		if(!$this->exists) return false;
-		$primaryKey = static::$primaryKey;
-		$tableName = $tableName ? $tableName : static::$tableName;
+		$primaryKey = static::PRIMARY_KEY;
+		$tableName = $tableName ? $tableName : static::TABLE_NAME;
 		$this->exists = false;
-		static::delete($tableName)->where(static::$primaryKey, '=', $this->$primaryKey)->exec();
+		static::delete($tableName)->where(static::PRIMARY_KEY, '=', $this->$primaryKey)->exec();
 		return $this;
 	}
 
@@ -307,7 +307,7 @@ abstract class Model extends QueryBuilderAbstract {
 	 * @return mixed $id
 	 */
 	public function getId() {
-		$primaryKey = static::$primaryKey;
+		$primaryKey = static::PRIMARY_KEY;
 		return $this->$primaryKey;
 	}
 

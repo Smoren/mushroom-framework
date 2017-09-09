@@ -6,7 +6,7 @@ use MushroomFramework\Facades\Cookie;
 use MushroomFramework\Facades\Session;
 
 abstract class User extends Model {
-	const COLUMN_ID = 'id';
+	const PRIMARY_KEY = 'id';
 	const COLUMN_LOGIN = 'email';
 	const COLUMN_PASSWORD = 'password';
 	const COLUMN_HASH_AUTH = 'hashAuth';
@@ -41,7 +41,7 @@ abstract class User extends Model {
 		}
 
 		$sessionUser = Session::get(static::SESSION_KEY, false);
-		$sessionUserId = isset($sessionUser[static::COLUMN_ID]) ? $sessionUser[static::COLUMN_ID] : false;
+		$sessionUserId = isset($sessionUser[static::PRIMARY_KEY]) ? $sessionUser[static::PRIMARY_KEY] : false;
 		$sessionUserHashAuth = isset($sessionUser[static::COLUMN_HASH_AUTH]) ? $sessionUser[static::COLUMN_HASH_AUTH] : false;
 		if($sessionUserId && $sessionUserId === $cookieUserId && $sessionUserHashAuth == $cookieUserHashAuth) {
 			$user = new static($sessionUser);

@@ -13,7 +13,7 @@ abstract class UuidModel extends Model {
 	}
 
 	public function getArrayList() {
-		$primaryKey = static::$primaryKey;
+		$primaryKey = static::PRIMARY_KEY;
 		$result = array();
 		$rs = $this->exec();
 		while($row = $rs->fetch()) {
@@ -24,12 +24,12 @@ abstract class UuidModel extends Model {
 	}
 
 	protected function onBeforeDataBound(&$fields) {
-		$fields[static::$primaryKey] = Uuid::fromBin($fields[static::$primaryKey]);
+		$fields[static::PRIMARY_KEY] = Uuid::fromBin($fields[static::PRIMARY_KEY]);
 		parent::onBeforeDataBound($fields);
 	}
 
 	protected function onBeforeSave(&$fields) {
-		$primaryKey = static::$primaryKey;
+		$primaryKey = static::PRIMARY_KEY;
 		if(!$this->exists && !$this->$primaryKey) {
 			$this->$primaryKey = Uuid::generate();
 		}
@@ -43,12 +43,12 @@ abstract class UuidModel extends Model {
 	}
 
 	public function getId() {
-		$primaryKey = static::$primaryKey;
+		$primaryKey = static::PRIMARY_KEY;
 		return (string)$this->$primaryKey;
 	}
 
 	public function asArray() {
-		$primaryKey = static::$primaryKey;
+		$primaryKey = static::PRIMARY_KEY;
 		$result = parent::asArray();
 		$result[$primaryKey] = (string)$result[$primaryKey];
 		return $result;
@@ -56,10 +56,10 @@ abstract class UuidModel extends Model {
 
 	public function remove($tableName=false) {
 		if(!$this->exists) return false;
-		$primaryKey = static::$primaryKey;
-		$tableName = $tableName ? $tableName : static::$tableName;
+		$primaryKey = static::PRIMARY_KEY;
+		$tableName = $tableName ? $tableName : static::TABLE_NAME;
 		$this->exists = false;
-		static::delete($tableName)->where(static::$primaryKey, '=', $this->$primaryKey->toBin())->exec();
+		static::delete($tableName)->where(static::PRIMARY_KEY, '=', $this->$primaryKey->toBin())->exec();
 		return $this;
 	}
 }

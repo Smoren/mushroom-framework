@@ -1,7 +1,7 @@
 <?php
 
 class TestUuid extends UuidModel {
-	protected static $tableName = 'testUuid';
+	const TABLE_NAME = 'testUuid';
 	protected static $fields = array('id', 'title');
 
 	public static function validation() {

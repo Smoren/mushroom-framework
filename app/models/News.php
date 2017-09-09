@@ -1,7 +1,7 @@
 <?php
 
 class News extends Model {
-	protected static $tableName = 'news';
+	const TABLE_NAME = 'news';
 	protected static $fields = array('id', 'name', 'text');
 	public static function validation() {
 		return array(
