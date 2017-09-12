@@ -5,8 +5,8 @@ use \MushroomFramework\Facades\Router;
 use \MushroomFramework\Facades\Response;
 use \MushroomFramework\Facades\Request;
 use \MushroomFramework\Routing\Controller;
-use \MushroomFramework\Database\Exceptions\ValidatorException;
-use MushroomFramework\Database\Exceptions\QueryBuilderException;
+use \MushroomFramework\ORMushroom\Exceptions\ValidatorException;
+use MushroomFramework\ORMushroom\Exceptions\QueryBuilderException;
 
 abstract class RestController extends Controller {
 	protected static $modelName;

@@ -1,6 +1,7 @@
 <?php
 
-namespace MushroomFramework\ORMushroom\Abstract;
+namespace MushroomFramework\ORMushroom\Base;
+use MushroomFramework\ORMushroom\DatabaseSession;
 use MushroomFramework\ORMushroom\Exceptions\QueryBuilderException;
 
 /**
@@ -23,6 +24,21 @@ abstract class QueryBuilder {
 	 * @var string $queryString Collate
 	 */
 	protected $queryString = '';
+
+	/**
+	 * @var DatabaseSession $_databaseSession
+	 */
+	protected $_databaseSession;
+
+	/**
+	 * Sets encoding and collate
+	 * @param string $encoding
+	 * @param string $collate
+	 * @return void
+	 */
+	public function setDatabaseSession(DatabaseSession $dbSession) {
+		$this->databaseSession = $dbSession;
+	}
 
 	/**
 	 * Sets encoding and collate
@@ -88,11 +104,11 @@ abstract class QueryBuilder {
 
 	/**
 	 * Executes query and returns QueryResult object
-	 * @param DatabaseManager $databaseManager (if false static::$databaseManager is in use)
+	 * @param DatabaseSession $databaseSession (if false static::$databaseManager is in use)
 	 * @return QueryResult
 	 */
-	public function exec($databaseManager) {
-		return $databaseManager->query($this->queryString);
+	public function exec(DatabaseSession $databaseSession=null) {
+		return $databaseSession->query($this->queryString);
 	}
 
 	/**

@@ -23,6 +23,22 @@ Event::register('another', function($data=null) {
 	echo "anotherHandler\n";
 });
 
+Event::register('onAfterInitIncluded', function($app) {
+	// $dbConfig = $app->getConfig()['database'];
+	// // $dbConfig['type'] = '123';
+	// $dbm = new \MushroomFramework\ORMushroom\DatabaseSession($dbConfig, true);
+	// $qs = \MushroomFramework\ORMushroom\QueryBuilder::select()
+	// 	->from('news')
+	// 	->where('id', '=', 4);
+	// // $qs = \MushroomFramework\ORMushroom\Mysql\QueryBuilder::select()
+	// // 	->from('news')
+	// // 	->where('id', '=', 1);
+	// echo $qs;
+	// echo '<pre>'; print_r($qs->exec($dbm)->fetch()); echo '</pre>';
+	// die();
+});
+
+
 /******************************
 -----------Маршруты------------
 ******************************/

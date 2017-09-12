@@ -1,6 +1,6 @@
 <?php
 
-namespace MushroomFramework\ORMushroom\Abstract;
+namespace MushroomFramework\Patterns;
 use \ReflectionClass;
 use \ReflectionMethod;
 use \ReflectionException;
@@ -9,7 +9,7 @@ abstract class Decorator {
 	protected static $className;
 	protected $obj;
 
-	static function init($className) {
+	static public function setClassName($className) {
 		static::$className = $className;
 	}
 	

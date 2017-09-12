@@ -3,9 +3,10 @@
 namespace MushroomFramework\Main;
 use \MushroomFramework\Routing\Router;
 use \MushroomFramework\Pattern\Singleton;
-use \MushroomFramework\Database\DatabaseManager;
+use \MushroomFramework\ORMushroom\DatabaseSession;
+// use \MushroomFramework\Database\DatabaseManager;
+// use \MushroomFramework\Database\QueryBuilder;
 use \MushroomFramework\InputOutput\Event;
-use \MushroomFramework\Database\QueryBuilder;
 use \Exception;
 use \Error;
 use \Closure;
@@ -47,6 +48,7 @@ class App extends Singleton {
 		if(static::gi()->config['debug']) {
 			echo $e->getMessage();
 			echo '<pre>'; print_r($e); echo '</pre>';
+			die();
 		} else {
 			// TODO: выводить стандартную страницу 500
 		}
@@ -65,8 +67,7 @@ class App extends Singleton {
 			// подключаем СУБД
 			Event::trigger('onBeforeDatabaseInit', $app);
 			if($this->config['database'] && $this->config['database']['type']) {
-				$this->database = DatabaseManager::get($this->config['database']);
-				QueryBuilder::setup($this->database);
+				$this->database = new DatabaseSession($this->config['database'], true);
 			}
 			Event::trigger('onAfterDatabaseInit', $app);
 		} catch(Exception $e) {

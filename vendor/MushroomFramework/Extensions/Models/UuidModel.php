@@ -1,7 +1,7 @@
 <?php
 
 namespace MushroomFramework\Extensions\Models;
-use MushroomFramework\Database\Model;
+use MushroomFramework\ORMushroom\Model;
 use MushroomFramework\Pattern\Uuid;
 
 abstract class UuidModel extends Model {

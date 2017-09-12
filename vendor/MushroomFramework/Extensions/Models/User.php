@@ -1,7 +1,7 @@
 <?php
 
 namespace MushroomFramework\Extensions\Models;
-use MushroomFramework\Database\Model;
+use MushroomFramework\ORMushroom\Model;
 use MushroomFramework\Facades\Cookie;
 use MushroomFramework\Facades\Session;
 
