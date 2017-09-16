@@ -1,7 +1,5 @@
 <?php
 
-use \MushroomFramework\Database\Migration;
-
 class Migration_2016_03_01_00_42_52_create_news_table extends Migration {
 	public function up() {
 		$this->createTable('news', array(

@@ -41,7 +41,7 @@ abstract class Migration {
 		$datetime = @date('Y_m_d_H_i_s', $timestamp);
 		$className = "Migration_{$datetime}_{$name}";
 		$fileName = "{$className}.php";
-		$migrationClassString = "<?php\n\nuse \MushroomFramework\Database\Migration;\n\nclass $className extends Migration {\n\tpublic function up() {\n\t\t\n\t}\n\tpublic function down() {\n\t\t\n\t}\n}";
+		$migrationClassString = "<?php\n\nclass $className extends Migration {\n\tpublic function up() {\n\t\t\n\t}\n\tpublic function down() {\n\t\t\n\t}\n}";
 		file_put_contents(MUSHROOM_DIR_APP_MIGRATIONS.'/'.$fileName, $migrationClassString);
 		QueryBuilder::insert(static::$tableName, array(
 			'name' => $name,

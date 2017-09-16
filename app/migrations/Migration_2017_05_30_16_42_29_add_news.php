@@ -1,7 +1,5 @@
 <?php
 
-use \MushroomFramework\Database\Migration;
-
 class Migration_2017_05_30_16_42_29_add_news extends Migration {
 	public function up() {
 		$news = array(

@@ -1,7 +1,5 @@
 <?php
 
-use \MushroomFramework\Database\Migration;
-
 class Migration_2016_03_03_09_48_11_create_user_table extends Migration {
 	public function up() {
 		$this->createTable('users', array(

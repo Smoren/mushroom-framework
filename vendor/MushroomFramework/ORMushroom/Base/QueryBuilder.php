@@ -2,7 +2,7 @@
 
 namespace MushroomFramework\ORMushroom\Base;
 
-use \MushroomFramework\ORMushroom\Exception\QueryBuilderException;
+use \MushroomFramework\ORMushroom\Exceptions\QueryBuilderException;
 use \MushroomFramework\ORMushroom\DatabaseSession;
 use \ReflectionException;
 use \ReflectionMethod;
@@ -73,9 +73,9 @@ class QueryBuilder {
 			$operator = $matches[1];
 			$methodName = $matches[2];
 			if(!in_array($operator, static::$_operators)) {
-				throw new Exception("wrong operator '$operator'");
+				throw new QueryBuilderException("wrong operator '$operator'");
 			} elseif(!method_exists($this, $methodName)) {
-				throw new Exception("unknown method '$methodName' called");
+				throw new QueryBuilderException("unknown method '$methodName' called");
 			} else {
 				$this->continueBracket();
 				$this->raw(strtoupper($operator));
@@ -141,6 +141,12 @@ class QueryBuilder {
 	protected function useDatabase($name) {
 		$this->raw("USE");
 		$this->raw($this->shieldColumn($name));
+		
+		return $this;
+	}
+
+	protected function showTables() {
+		$this->raw("SHOW TABLES");
 		
 		return $this;
 	}
@@ -296,6 +302,10 @@ class QueryBuilder {
 		$this->raw("ORDER BY");
 		$this->raw(implode(', ', $by));
 		return $this;
+	}
+
+	protected function orderBy(array $by) {
+		return $this->order($by);
 	}
 
 	protected function limit($num1, $num2=false) {

@@ -19,6 +19,8 @@ return array(
 		'Controller' => '\MushroomFramework\Routing\Controller',
 		'ControllerDecorator' => '\MushroomFramework\Routing\ControllerDecorator',
 		'DatabaseSession' => '\MushroomFramework\ORMushroom\DatabaseSession',
+		'Migration' => '\MushroomFramework\ORMushroom\Migration',
+		'Table' => '\MushroomFramework\ORMushroom\Table',
 		'QueryBuilder' => '\MushroomFramework\ORMushroom\QueryBuilder',
 		'Model' => '\MushroomFramework\ORMushroom\Model',
 		'View' => '\MushroomFramework\View\View',
