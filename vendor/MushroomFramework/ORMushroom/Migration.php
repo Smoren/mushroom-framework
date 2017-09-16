@@ -1,6 +1,6 @@
 <?php
 
-namespace MushroomFramework\Database;
+namespace MushroomFramework\ORMushroom;
 use \Exception;
 
 /**

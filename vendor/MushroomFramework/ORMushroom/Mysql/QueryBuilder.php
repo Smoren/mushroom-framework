@@ -9,5 +9,7 @@ use MushroomFramework\ORMushroom\Base;
  * @author Smoren <ofigate@gmail.com>
  */
 class QueryBuilder extends Base\QueryBuilder {
-	
+	protected function select(...$fields) {
+		return parent::select(...$fields);
+	}
 }

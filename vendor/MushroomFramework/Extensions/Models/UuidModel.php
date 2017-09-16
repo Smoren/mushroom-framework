@@ -5,11 +5,14 @@ use MushroomFramework\ORMushroom\Model;
 use MushroomFramework\Pattern\Uuid;
 
 abstract class UuidModel extends Model {
-	public static function find($id) {
+	public static function find(...$args) {
+		list($className, $dbSession) = static::init($args);
+
+		$id = $args[0];
 		if(!($id instanceof Uuid)) {
 			$id = new Uuid($id);
 		}
-		return parent::find($id->toBin());
+		return parent::find($dbSession, $id->toBin());
 	}
 
 	public function getArrayList() {

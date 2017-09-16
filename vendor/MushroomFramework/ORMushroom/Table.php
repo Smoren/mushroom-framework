@@ -1,7 +1,7 @@
 <?php
 
-namespace MushroomFramework\Database;
-use \Exception;
+namespace MushroomFramework\ORMushroom;
+use \MushroomFramework\Exceptions\QueryBuilderException;
 
 /**
  * Table Class
@@ -28,12 +28,12 @@ class Table {
 	/**
 	 * Searches and returns Table object
 	 * @param string $tableName
-	 * @throws Exception
+	 * @throws QueryBuilderException
 	 * @return Table
 	 */
 	public static function get($tableName) {
 		if(!QueryBuilder::showTables($tableName)->exec()->fetch()) {
-			throw new Exception("table '$tableName' is not exist");
+			throw new QueryBuilderException("table '$tableName' is not exist");
 		}
 		return new static($tableName);
 	}

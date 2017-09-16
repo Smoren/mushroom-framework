@@ -1,571 +1,378 @@
 <?php
 
 namespace MushroomFramework\ORMushroom\Base;
-use MushroomFramework\ORMushroom\DatabaseSession;
-use MushroomFramework\ORMushroom\Exceptions\QueryBuilderException;
+
+use \MushroomFramework\ORMushroom\Exception\QueryBuilderException;
+use \MushroomFramework\ORMushroom\DatabaseSession;
+use \ReflectionException;
+use \ReflectionMethod;
 
 /**
  * QueryBuilder Class
  * @version 0.1.0
  * @author Smoren <ofigate@gmail.com>
  */
-abstract class QueryBuilder {
-	/**
-	 * @var string $encoding Encoding
-	 */
-	protected static $encoding = 'utf8';
+class QueryBuilder {
+	protected static $_operators = array('and', 'or', 'left', 'right', 'inner', 'outer');
+	protected static $_encoding = 'utf8';
+	protected static $_collate = 'utf8_general_ci';
+	protected $_queryString;
+	protected $_bracketCount;
 
-	/**
-	 * @var string $collate Collate
-	 */
-	protected static $collate = 'utf8_general_ci';
-
-	/**
-	 * @var string $queryString Collate
-	 */
-	protected $queryString = '';
-
-	/**
-	 * @var DatabaseSession $_databaseSession
-	 */
-	protected $_databaseSession;
-
-	/**
-	 * Sets encoding and collate
-	 * @param string $encoding
-	 * @param string $collate
-	 * @return void
-	 */
-	public function setDatabaseSession(DatabaseSession $dbSession) {
-		$this->databaseSession = $dbSession;
-	}
-
-	/**
-	 * Sets encoding and collate
-	 * @param string $encoding
-	 * @param string $collate
-	 * @return void
-	 */
 	public static function setEncoding($encoding, $collate) {
-		static::$encoding = $encoding;
-		static::$collate = $collate;
-	}
-
-	/**
-	 * Add slashes for protecting from sql-injections
-	 * @param string $str
-	 * @return string
-	 */
-	public static function shield($str) {
-		return addslashes($str);
-	}
-
-	/**
-	 * Starts query by setting $str as $this->queryString
-	 * @param string $str
-	 * @return QueryBuilder
-	 */
-	public static function startQuery($str) {
-		$qb = new static;
-		$qb->queryString = $str;
-		return $qb;
-	}
-
-	/**
-	 * Adds $str as $this->queryString
-	 * @param string $str
-	 * @return QueryBuilder
-	 */
-	public function addToQuery($str) {
-		$this->queryString .= " $str ";
-		return $this;
-	}
-
-	/**
-	 * Adds $str as $this->queryString
-	 * @param string $str
-	 * @return QueryBuilder
-	 */
-	public function raw($str) {
-		return $this->addToQuery($str);
-	}
-
-	/**
-	 * Returns query string
-	 * @return string
-	 */
-	public function getQueryString() {
-		return str_replace('  ', ' ', $this->queryString);
-	}
-
-	function __toString() {
-		return $this->getQueryString();
-	}
-
-	/**
-	 * Executes query and returns QueryResult object
-	 * @param DatabaseSession $databaseSession (if false static::$databaseManager is in use)
-	 * @return QueryResult
-	 */
-	public function exec(DatabaseSession $databaseSession=null) {
-		return $databaseSession->query($this->queryString);
-	}
-
-	/**
-	 * Starts SELECT sql query
-	 * @param array ...$data List of the selecting fields
-	 * @return QueryBuilder
-	 */
-	public static function select(...$select) {
-		if(!sizeof($select)) $select = array('*');
-		$qb = static::startQuery('SELECT');
-		foreach($select as &$val) {
-			$val = $qb::formatColName($val, true);
-		}
-		$qb->addToQuery(implode(', ', $select));
+		static::$_encoding = $encoding;
+		static::$_collate = $collate;
 		
-		return $qb;
+		return $this;
 	}
 
-	/**
-	 * Makes INSERT sql query
-	 * @param string $tableName
-	 * @param array $fields
-	 * @return QueryBuilder
-	 */
-	public static function insert($tableName, $fields) {
-		$qb = static::startQuery("INSERT INTO $tableName");
-		$colNames = array();
-		$values = array();
-		foreach($fields as $colName => $value) {
-			$colNames[] = $colName;
-			$values[] = $value;
+	public static function __callStatic($methodName, $args) {
+		// получаем имя класса
+		$className = get_called_class();
+		
+		// если метод существует
+		if(method_exists($className, $methodName)) {
+			// получаем объект метода
+			$method = new ReflectionMethod($className, $methodName);
+
+			// не позволим вызвать метод, если он является приватным либо начинается с символа "_"
+			if(preg_match('/^_/', $methodName) || $method->isPrivate()) {
+				throw new ReflectionException("calling forbidden internal method '$methodName'");
+			}
+
+			// создаем объект
+			$qb = new static();
+
+			// запускаем метод и возвращаем его результат
+			return $qb->$methodName(...$args);
 		}
 
-		foreach($colNames as &$val) {
-			$val = $qb::formatColName($val);
+		throw new ReflectionException("unknown static method '$methodName' called");
+	}
+
+	public function __call($methodName, $args) {
+		// если метод класса определен
+		if(method_exists($this, $methodName)) {
+			$method = new ReflectionMethod($this, $methodName);
+
+			// не позволим вызвать метод, если он является приватным либо начинается с символа "_"
+			if(preg_match('/^_/', $methodName) || $method->isPrivate()) {
+				throw new ReflectionException("forbidden internal method '$methodName' called");
+			}
+
+			// запускаем метод и возвращаем его результат
+			return $this->$methodName(...$args);
 		}
-		foreach($values as &$val) {
-			$val = $qb->formatValue($val);
+
+		if(in_array($methodName, static::$_operators)) {
+			return $this->raw(strtoupper($methodName));
 		}
 
-		$qb->addToQuery('(');
-		$qb->addToQuery(implode(', ', $colNames));
-		$qb->addToQuery(')');
-
-		$qb->addToQuery('VALUES (');
-		$qb->addToQuery(implode(', ', $values));
-		$qb->addToQuery(')');
-
-		return $qb;
-	}
-
-	/**
-	 * Starts UPDATE sql query
-	 * @param string $tableName
-	 * @param array $fields
-	 * @return QueryBuilder
-	 */
-	// создает запрос UPDATE
-	public static function update($tableName, $fields) {
-		foreach($fields as $colName => $val) {
-			$fields[$colName] = static::formatColName($colName)." = ".static::formatValue($val);
-		}
-		$qb = static::startQuery("UPDATE ".static::formatColName($tableName)." SET ");
-		$qb->addToQuery(implode(', ', $fields));
-		return $qb;
-	}
-
-	/**
-	 * Makes CREATE TABLE sql query
-	 * @param string $tableName
-	 * @param array $fields
-	 * @return QueryBuilder
-	 */
-	public static function createTable($tableName, $fields) {
-		$qb = static::startQuery("CREATE TABLE IF NOT EXISTS ".static::formatColName($tableName)." (");
-		foreach($fields as $colName => $params) {
-			$fields[$colName] = static::formatColName($colName)." $params";
-		}
-		$qb->addToQuery(implode(', ', $fields));
-		$qb->addToQuery(") CHARACTER SET ".static::formatValue(static::$encoding)." COLLATE ".static::formatValue(static::$collate).";");
-		return $qb;
-	}
-
-	/**
-	 * Starts DELETE sql query
-	 * @param string $tableName
-	 * @return QueryBuilder
-	 */
-	public static function delete($tableName) {
-		$qb = static::startQuery("DELETE FROM ".static::formatColName($tableName));
-		return $qb;
-	}
-
-	/**
-	 * Makes FROP TABLE sql query
-	 * @param string $tableName
-	 * @return QueryBuilder
-	 */
-	public static function dropTable($tableName) {
-		$qb = static::startQuery("DROP TABLE ".static::formatColName($tableName));
-		return $qb;
-	}
-
-	/**
-	 * Starts ALTER TABLE sql query
-	 * @param string $tableName
-	 * @return QueryBuilder
-	 */
-	public static function alterTable($tableName) {
-		$qb = static::startQuery("ALTER TABLE ".static::formatColName($tableName));
-		return $qb;
-	}
-
-	/**
-	 * Continues ALTER TABLE with ADD COLUMN
-	 * @param string $colName
-	 * @param array $params
-	 * @return $this
-	 */
-	public function addColumn($colName, $params) {
-		$this->addToQuery("ADD COLUMN ".static::formatColName($colName)." $params");
-		return $this;
-	}
-
-	/**
-	 * Continues ALTER TABLE with MODIFY/EDIT COLUMN
-	 * @param string $colName
-	 * @param array $params
-	 * @return $this
-	 */
-	public function editColumn($colName, $params) {
-		$this->addToQuery("MODIFY COLUMN ".static::formatColName($colName)." $params");
-		return $this;
-	}
-
-	/**
-	 * Continues ALTER TABLE with DROP COLUMN
-	 * @param string $colName
-	 * @return $this
-	 */
-	public function dropColumn($colName) {
-		$this->addToQuery("DROP COLUMN ".static::formatColName($colName));
-		return $this;
-	}
-
-	/**
-	 * Continues ALTER TABLE with ADD INDEX
-	 * @param string $colName
-	 * @return $this
-	 */
-	public function addIndex($colName) {
-		$colName = static::formatColName($colName);
-		$this->addToQuery("ADD INDEX $colName ($colName)");
-		return $this;
-	}
-
-	/**
-	 * Continues ALTER TABLE with DROP INDEX
-	 * @param string $colName
-	 * @return $this
-	 */
-	public function dropIndex($colName) {
-		$this->addToQuery("DROP INDEX ".static::formatColName($colName));
-		return $this;
-	}
-
-	/**
-	 * Continues ALTER TABLE with ADD UNIQUE
-	 * @param string $colName
-	 * @return $this
-	 */
-	public function addUnique($colName) {
-		$colName = static::formatColName($colName);
-		$this->addToQuery("ADD UNIQUE $colName ($colName)");
-		return $this;
-	}
-
-	/**
-	 * Continues ALTER TABLE with ADD FOREIGN KEY
-	 * @param string $colName
-	 * @param string $forTable
-	 * @param string $forColumn
-	 * @param string $onDelete
-	 * @param string $onUpdate
-	 * @return $this
-	 */
-	public function addForeignKey($colName, $forTable, $forColumn, $onDelete=false, $onUpdate=false) {
-		$colName = static::formatColName($colName);
-		$forTable = static::formatColName($forTable);
-		$forColumn = static::formatColName($forColumn);
-		$this->addToQuery("ADD FOREIGN KEY $colName ($colName)");
-		$this->addToQuery("REFERENCES $forTable ($forColumn)");
-		if($onDelete) {
-			$this->addToQuery("ON DELETE $onDelete");
-		}
-		if($onUpdate) {
-			$this->addToQuery("ON UPDATE $onUpdate");
-		}
-		return $this;
-	}
-
-	/**
-	 * Adds comma to $this->queryString
-	 * @return $this
-	 */
-	public function comma() {
-		$this->addToQuery(",");
-		return $this;
-	}
-
-	/**
-	 * Makes sql query to show tables list
-	 * @param string $like
-	 * @return QuwetBuilder
-	 */
-	static function showTables($like="") {
-		$qb = static::startQuery("SHOW TABLES ");
-		if($like) $qb->addToQuery("LIKE ".static::formatValue($like));
-		return $qb;
-	}
-
-	/**
-	 * Continues SELECT query with FROM
-	 * @param string $tableName
-	 * @param string $as
-	 * @return $this
-	 */
-	public function from($tableName, $as='') {
-		$this->addToQuery("FROM ".static::formatColName($tableName));
-		if($as) $this->addToQuery("AS ".static::shield($as));
-		return $this;
-	}
-
-	/**
-	 * Starts bracket operation
-	 * @return $this
-	 */
-	public function startBracketOperation() {
-		$this->addToQuery(" (");
-		return $this;
-	}
-
-	/**
-	 * Continues bracket operation
-	 * @return $this
-	 */
-	public function continueBracketOperation() {
-		$this->queryString = preg_replace('/\)[ ]*$/', '', $this->queryString);
-	}
-
-	/**
-	 * Ends bracket operation
-	 * @return $this
-	 */
-	public function endBracketOperation() {
-		$this->addToQuery(")");
-	}
-
-	/**
-	 * Adds condition to $this->queryString
-	 * @param string $key
-	 * @param string $sign
-	 * @param mixed $val
-	 * @return $this
-	 */
-	public function condition($key, $sign, $val) {
-		$this->addToQuery(static::formatColName($key));
-		$this->addToQuery(static::shield($sign));
-		if(preg_match('/^[A-Za-z0-9_]+\.[A-Za-z0-9_]+$/', $val)) {
-			$this->addToQuery(static::formatColName($val));
-		} else {
-			$this->addToQuery(static::formatValue($val));
-		}
-	}
-
-	/**
-	 * Adds WHERE condition to $this->queryString
-	 * @param string $key
-	 * @param string $sign
-	 * @param mixed $val
-	 * @return $this
-	 */
-	public function where($key, $sign, $val) {
-		$this->addToQuery("WHERE");
-		$this->startBracketOperation();
-		$this->condition($key, $sign, $val);
-		$this->endBracketOperation();
-		return $this;
-	}
-
-	/**
-	 * Adds AND WHERE condition to $this->queryString
-	 * @param string $key
-	 * @param string $sign
-	 * @param mixed $val
-	 * @return $this
-	 */
-	public function andWhere($key, $sign, $val) {
-		$this->continueBracketOperation();
-		$this->addToQuery("AND");
-		$this->condition($key, $sign, $val);
-		$this->endBracketOperation();
-		return $this;
-	}
-
-	/**
-	 * Adds OR WHERE condition to $this->queryString
-	 * @param string $key
-	 * @param string $sign
-	 * @param mixed $val
-	 * @return $this
-	 */
-	public function orWhere($key, $sign, $val) {
-		$this->continueBracketOperation();
-		$this->addToQuery("OR");
-		$this->condition($key, $sign, $val);
-		$this->endBracketOperation();
-		return $this;
-	}
-
-	/**
-	 * Adds ON condition to $this->queryString
-	 * @param string $key
-	 * @param string $sign
-	 * @param mixed $val
-	 * @return $this
-	 */
-	public function on($key, $sign, $val) {
-		$this->addToQuery("ON");
-		$this->startBracketOperation();
-		$this->condition($key, $sign, $val);
-		$this->endBracketOperation();
-		return $this;
-	}
-
-	/**
-	 * Adds AND ON condition to $this->queryString
-	 * @param string $key
-	 * @param string $sign
-	 * @param mixed $val
-	 * @return $this
-	 */
-	public function andOn($key, $sign, $val) {
-		return $this->andWhere($key, $sign, $val);
-	}
-
-	/**
-	 * Adds OR ON condition to $this->queryString
-	 * @param string $key
-	 * @param string $sign
-	 * @param mixed $val
-	 * @return $this
-	 */
-	public function orOn($key, $sign, $val) {
-		return $this->orWhere($key, $sign, $val);
-	}
-
-	/**
-	 * Adds ORDER BY to $this->queryString
-	 * @param array $order
-	 * @return $this
-	 */
-	public function orderBy($order) {
-		foreach($order as $colName => $val) {
-			$order[$colName] = static::formatColName($colName)." ".static::shield($val);
-		}
-		$this->addToQuery("ORDER BY ".implode(', ', $order));
-		return $this;
-	}
-
-	/**
-	 * Adds LIMIT to $this->queryString
-	 * @param int $num1
-	 * @param int $num2
-	 * @return $this
-	 */
-	public function limit($num1, $num2=false) {
-		$this->addToQuery("LIMIT ".intval($num1));
-		if(!($num2 === false)) $this->addToQuery(", ".intval($num2));
-		return $this;
-	}
-
-	/**
-	 * Adds JOIN to $this->queryString
-	 * @param string $tableName
-	 * @param string $as
-	 * @return $this
-	 */
-	public function join($tableName, $as='') {
-		$this->addToQuery("JOIN ".static::formatColName($tableName)." ".static::shield($as));
-		return $this;
-	}
-
-	/**
-	 * Adds LEFT JOIN to $this->queryString
-	 * @param string $tableName
-	 * @param string $as
-	 * @return $this
-	 */
-	public function leftJoin($tableName, $as='') {
-		$this->addToQuery("LEFT");
-		return $this->join($tableName, $as);
-	}
-
-	/**
-	 * Adds RIGHT JOIN to $this->queryString
-	 * @param string $tableName
-	 * @param string $as
-	 * @return $this
-	 */
-	public function rightJoin($tableName, $as='') {
-		$this->addToQuery("RIGHT");
-		return $this->join($tableName, $as);
-	}
-
-	/**
-	 * Shields col name
-	 * @param string $str
-	 * @param string $addAs
-	 * @return string
-	 */
-	public static function formatColName($str, $addAs=false) {
-		if(!$str) return '';
-		$arStr = explode('.', $str);
-		foreach($arStr as &$val) {
-			if($val == "*") {
-				$val = static::shield($val);
-				$addAs = false;
-			} elseif(preg_match('/[A-Za-z0-9_]+\([A-Za-z0-9_\*]+\)/', $val)) {
-				$val = static::shield($val);
-				$addAs = false;
+		// пробуем найти метод с оператором (например, andWhere)
+		if(preg_match('/^([a-z]+)([A-Z][A-Za-z]+)$/', $methodName, $matches)) {
+			$operator = $matches[1];
+			$methodName = $matches[2];
+			if(!in_array($operator, static::$_operators)) {
+				throw new Exception("wrong operator '$operator'");
+			} elseif(!method_exists($this, $methodName)) {
+				throw new Exception("unknown method '$methodName' called");
 			} else {
-				$val = "`".static::shield($val)."`";
+				$this->continueBracket();
+				$this->raw(strtoupper($operator));
+				array_push($args, true);
+				return $this->$methodName(...$args);
 			}
 		}
-		$res = implode('.', $arStr);
-		if($addAs) $res .= " AS ".implode('_', str_replace('`', '', $arStr));
-		return $res;
+
+		throw new ReflectionException("unknown method '$methodName' called");
 	}
 
-	/**
-	 * Shields col value
-	 * @param mixed $str
-	 * @return string
-	 */
-	public static function formatValue($str) {
-		return "'".static::shield($str)."'";
+	public function __construct() {
+		$this->_queryString = '';
+		$this->_bracketCount = 0;
 	}
 
-	/**
-	 * Makes where-conditions from string like colname1=value1&(colname2~value2|colname3>value3)
-	 * @param string $filterString
-	 * @param array $filterFields
-	 * @param array $filterOperators
-	 * @return QueryBuilder
-	 */
-	public function parseFilter($filterString='', $filterFields=array(), $filterOperators=array()) {
+	public function __toString() {
+		return preg_replace('/[ ]+/', ' ', $this->_queryString);
+	}
+
+	protected function exec(DatabaseSession $dbSession) {
+		if($this->_bracketCount != 0) {
+			throw new QueryBuilderException('uncapped bracket', $this);
+		}
+		return $dbSession->query($this);
+	}
+
+	protected function raw($str) {
+		$this->_queryString .= " $str ";
+		return $this;
+	}
+
+	protected function addQuery(QueryBuilder $qb) {
+		$this->raw($qb);
+	}
+
+	protected function createDatabase($name) {
+		$this->raw("CREATE DATABASE");
+		$this->raw($this->shieldColumn($name));
+		
+		$this->raw("DEFAULT CHARACTER SET");
+		$this->raw($this->shieldColumn(static::$_encoding));
+		
+		$this->raw("DEFAULT COLLATE");
+		$this->raw($this->shieldColumn(static::$collate));
+
+		return $this;
+	}
+
+	protected function dropDatabase($name) {
+		$this->raw("DROP DATABASE");
+		$this->raw($this->shieldColumn($name));
+		
+		return $this;
+	}
+
+	protected function showDatabases() {
+		$this->raw("SHOW DATABASES");
+		
+		return $this;
+	}
+
+	protected function useDatabase($name) {
+		$this->raw("USE");
+		$this->raw($this->shieldColumn($name));
+		
+		return $this;
+	}
+
+	protected function createTable($name, array $fields) {
+		$this->raw("CREATE TABLE IF NOT EXISTS");
+		$this->raw($this->shieldColumn($name));
+		
+		$this->openBracket();
+		foreach($fields as $columnName => &$params) {
+			$params = $this->shieldColumn($columnName)." ".$this->shield($params);
+		}
+		$this->raw(implode(', ', $fields));
+		$this->closeBracket();
+
+		$this->raw("CHARACTER SET");
+		$this->raw($this->shieldValue(static::$_encoding));
+		$this->raw("COLLATE");
+		$this->raw($this->shieldValue(static::$_collate));
+		$this->raw(";");
+
+		return $this;
+	}
+
+	protected function dropTable($name) {
+		$this->raw("DROP TABLE");
+		$this->raw($this->shieldColumn($name));
+		
+		return $this;
+	}
+
+	protected function alterTable($name) {
+		$this->raw("ALTER TABLE");
+		$this->raw($this->shieldColumn($name));
+		
+		return $this;
+	}
+
+	protected function truncate($tableName) {
+		$this->raw("TRUNCATE TABLE");
+		$this->raw($this->shieldColumn($name));
+		
+		return $this;
+	}
+
+	protected function select(...$fields) {
+		$this->raw("SELECT");
+		if(!sizeof($fields)) $fields = array('*');
+		foreach($fields as &$value) {
+			$value = $this->shieldColumn($value, true);
+		}
+		$this->raw(implode(', ', $fields));
+		
+		return $this;
+	}
+
+	protected function insert($tableName, array $fields) {
+		$this->raw("INSERT INTO");
+		$this->raw($this->shieldColumn($tableName));
+		
+		$columnNames = array();
+		$values = array();
+		foreach($fields as $columnName => $value) {
+			$columnNames[] = $this->shieldColumn($columnName);
+			$values[] = $this->shieldValue($value);
+		}
+
+		$this->openBracket();
+		$this->raw(implode(', ', $columnNames));
+		$this->closeBracket();
+
+		$this->raw("VALUES");
+		$this->openBracket();
+		$this->raw(implode(', ', $values));
+		$this->closeBracket();
+
+		return $this;
+	}
+
+	protected function update($tableName, array $fields) {
+		foreach($fields as $columnName => &$value) {
+			$value = $this->shieldColumn($columnName)." = ".$this->shieldValue($value);
+		}
+		$this->raw("UPDATE");
+		$this->raw($this->shieldColumn($tableName));
+		$this->raw("SET");
+		$this->raw(implode(', ', $fields));
+
+		return $this;
+	}
+
+	protected function delete($tableName) {
+		$this->raw("DELETE FROM");
+		$this->raw($this->shieldColumn($tableName));
+		
+		return $this;
+	}
+
+	protected function from($tableName, $as=null) {
+		$this->raw("FROM");
+		$this->raw($this->shieldColumn($tableName));
+		if($as) {
+			$this->raw($this->shield($as));
+		}
+		
+		return $this;
+	}
+
+	protected function where($key=null, $operator=null, $value=null, $continueFlag=false) {
+		if(!$key) {
+			$this->raw("WHERE");
+			return $this;
+		}
+
+		if(!$continueFlag) {
+			$this->raw("WHERE");
+			$this->openBracket();
+		}
+		$this->condition($key, $operator, $value);
+		$this->closeBracket();
+		
+		return $this;
+	}
+
+	protected function join($tableName, $as=null) {
+		$this->raw("JOIN");
+		$this->raw($this->shieldColumn($tableName));
+		if($as) $this->raw($this->shield($as));
+		
+		return $this;
+	}
+
+	protected function on($key=null, $operator=null, $value=null, $continueFlag=false) {
+		if(!$key) {
+			$this->raw("ON");
+			return $this;
+		}
+
+		if(!$continueFlag) {
+			$this->raw("ON");
+			$this->openBracket();
+		}
+		$this->condition($key, $operator, $value);
+		$this->closeBracket();
+		
+		return $this;
+	}
+
+	protected function order(array $by) {
+		foreach($by as $columnName => &$direction) {
+			$direction = $this->shieldColumn($columnName)." ".$this->shield($direction);
+		}
+		$this->raw("ORDER BY");
+		$this->raw(implode(', ', $by));
+		return $this;
+	}
+
+	protected function limit($num1, $num2=false) {
+		$this->raw("LIMIT ".intval($num1));
+		if(!($num2 === false)) {
+			$this->raw(", ".intval($num2));
+		}
+		
+		return $this;
+	}
+
+	protected function addColumn($columnName, $params) {
+		$this->raw("ADD COLUMN");
+		$this->raw($this->shieldColumn($columnName));
+		$this->raw($this->shield($params));
+		
+		return $this;
+	}
+
+	protected function editColumn($columnName, $params) {
+		$this->raw("MODIFY COLUMN");
+		$this->raw($this->shieldColumn($columnName));
+		$this->raw($this->shield($params));
+		
+		return $this;
+	}
+
+	protected function dropColumn($columnName) {
+		$this->raw("DROP COLUMN");
+		$this->raw($this->shieldColumn($columnName));
+		
+		return $this;
+	}
+
+	protected function addIndex($columnName) {
+		$columnName = $this->shieldColumn($columnName);
+		$this->raw("ADD INDEX $columnName ($columnName)");
+		
+		return $this;
+	}
+
+	protected function dropIndex($columnName) {
+		$this->raw("DROP INDEX");
+		$this->raw($this->shieldColumn($columnName));
+		
+		return $this;
+	}
+
+	protected function addUnique() {
+		$columnName = $this->shieldColumn($columnName);
+		$this->raw("ADD UNIQUE $columnName ($columnName)");
+		
+		return $this;
+	}
+
+	protected function addForeignKey($columnName, $tableFor, $columnFor, $onDelete=false, $onUpdate=false) {
+		$columnName = $this->shieldColumn($columnName);
+		$tableFor = $this->shieldColumn($tableFor);
+		$columnFor = $this->shieldColumn($columnFor);
+
+		$this->addToQuery("ADD FOREIGN KEY $columnName ($columnName)");
+		$this->addToQuery("REFERENCES $tableFor ($columnFor)");
+		
+		if($onDelete) {
+			$onDelete = $this->shield($onDelete);
+			$this->addToQuery("ON DELETE $onDelete");
+		}
+		
+		if($onUpdate) {
+			$onUpdate = $this->shield($onUpdate);
+			$this->addToQuery("ON UPDATE $onUpdate");
+		}
+
+		return $this;
+	}
+
+	public function parseFilter($filterString='', array $filterFields=array(), array $filterOperators=array()) {
 		if(!strlen($filterString)) return $this;
 
 		$operators = array(
@@ -578,34 +385,31 @@ abstract class QueryBuilder {
 			'~' => 'LIKE',
 		);
 
-		$this->addToQuery("WHERE");
-		$this->startBracketOperation();
-		$this->startBracketOperation();
+		$this->where();
+		$this->openBracket();
+		$this->openBracket();
 		
-		$bracketsLevel = 0;
 		while(strlen($filterString)) {
 			$skipChars = 1;
 
 			switch($filterString[0]) {
 				case '(':
-					$bracketsLevel++;
-					$this->startBracketOperation();
+					$this->openBracket();
 					break;
 				case ')':
-					$bracketsLevel--;
-					$this->endBracketOperation();
+					$this->closeBracket();
 					break;
 				case '&':
 					if(!in_array('AND', $filterOperators)) {
 						throw new QueryBuilderException('forbidden logic operator');
 					}
-					$this->addToQuery("AND");
+					$this->and();
 					break;
 				case '|':
 					if(!in_array('OR', $filterOperators)) {
 						throw new QueryBuilderException('forbidden logic operator');
 					}
-					$this->addToQuery("OR");
+					$this->or();
 					break;
 				default:
 					if(preg_match("/^([a-zA-Z0-9_]+)([\=\>\<\~\!][\=]{0,1})([0-9]*)/", $filterString, $matches)) {
@@ -667,23 +471,13 @@ abstract class QueryBuilder {
 			if($skipChars) $filterString = substr($filterString, $skipChars);
 		}
 
-		if($bracketsLevel) {
-			throw new QueryBuilderException('bad brackets');
-		}
-	
-		$this->endBracketOperation();
-		$this->endBracketOperation();
+		$this->closeBracket();
+		$this->closeBracket();
 
 		return $this;
 	}
 
-	/**
-	 * Makes order-conditions from string like colname1:asc,colname2:desc
-	 * @param string $orderString
-	 * @param array $orderFields
-	 * @return QueryBuilder
-	 */
-	public function parseOrder($orderString='', $orderFields=array()) {
+	public function parseOrder($orderString='', array $orderFields=array()) {
 		if(!strlen($orderString)) return $this;
 
 		$orders = explode(',', $orderString);
@@ -700,15 +494,10 @@ abstract class QueryBuilder {
 			}
 		}
 
-		return $this->orderBy($orderBy);
+		return $this->order($orderBy);
 	}
 
-	/**
-	 * Makes limit-condition from params array like array('limit' => 10, 'page' => 2)
-	 * @param array $params
-	 * @return QueryBuilder
-	 */
-	public function parseLimit($params) {
+	public function parseLimit(array $params, $maxListLimit=0) {
 		if(isset($params['limit'])) {
 			$limit = intval($params['limit']);
 			if($maxListLimit && ($limit > $maxListLimit || $limit < 0)) {
@@ -733,4 +522,82 @@ abstract class QueryBuilder {
 
 		return $this;
 	}
+
+	protected function comma() {
+		$this->raw(",");
+		
+		return $this;
+	}
+
+	protected function openBracket() {
+		$this->_bracketCount++;
+		$this->raw(" (");
+		
+		return $this;
+	}
+
+	protected function continueBracket() {
+		$re = '/\)[ ]*$/';
+		if(preg_match($re, $this->_queryString)) {
+			$this->_bracketCount++;
+			$this->_queryString = preg_replace($re, '', $this->_queryString);
+		}
+		
+		return $this;
+	}
+
+	protected function closeBracket() {
+		$this->_bracketCount--;
+		$this->raw(" )");
+		
+		return $this;
+	}
+
+	protected function condition($key, $operator, $value) {
+		$this->raw($this->shieldColumn($key));
+		$this->raw($this->shieldOperator($operator));
+		
+		if(preg_match('/^[A-Za-z0-9_]+\.[A-Za-z0-9_]+$/', $value)) {
+			$this->raw($this->shieldColumn($value));
+		} else {
+			$this->raw($this->shieldValue($value));
+		}
+		
+		return $this;
+	}
+
+	protected function shield($str) {
+		return addslashes($str);
+	}
+
+	protected function shieldColumn($name, $asFlag=false) {
+		if(!$name) return '';
+		$arName = explode('.', $name);
+		foreach($arName as &$val) {
+			if($val == "*") {
+				$val = $this->shield($val);
+				$asFlag = false;
+			} elseif(preg_match('/[A-Za-z0-9_]+\([A-Za-z0-9_\*]+\)/', $val)) {
+				$val = $this->shield($val);
+				$asFlag = false;
+			} else {
+				$val = "`".$this->shield($val)."`";
+			}
+		}
+		$res = implode('.', $arName);
+		if($asFlag) {
+			$res .= " AS ".implode('_', str_replace('`', '', $arName));
+		}
+		
+		return $res;
+	}
+
+	protected function shieldOperator($name) {
+		return $this->shield($name);
+	}
+
+	protected function shieldValue($value) {
+		return "'".$this->shield($value)."'";
+	}
 }
+

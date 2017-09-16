@@ -42,12 +42,12 @@ abstract class Model extends QueryBuilder {
 	 */
 	protected $validator;
 
-	public static function _getDecoratedClassName(ORMushroom\DatabaseSession $databaseSession=null, $className=null) {
-		return parent::_getDecoratedClassName($databaseSession, 'QueryBuilder');
-	}
+	function __construct(...$args) {
+		static::init($args, $this);
 
-	function __construct($row=false, $exists=false) {
-		parent::__construct($row, $exists);
+		$row = isset($args[0]) ? $args[0] : null;
+		$exists = isset($args[1]) ? $args[1] : false;
+
 		$this->exists = $exists;
 
 		// отрабатываем событие
@@ -82,7 +82,7 @@ abstract class Model extends QueryBuilder {
 	}
 
 	function __toString() {
-		return $this->_decoratedObject->getQueryString();
+		return strval($this->_decoratedObject);
 	}
 
 	/**
@@ -117,10 +117,13 @@ abstract class Model extends QueryBuilder {
 	 * @return mixed (false or Model)
 	 */
 	public static function find(...$args) {
-		$dbs = static::_getDatabaseSession($args);
-		$row = static::select($dbs)->where(static::PRIMARY_KEY, '=', $args[0])->exec()->fetch();
+		$query = static::create($args);
+		$row = $query->select()
+			->where(static::PRIMARY_KEY, '=', $args[0])
+			->exec()
+			->fetch();
 		if(!$row) return false;
-		return new static($row, true);
+		return new static($query->getDatabaseSession(), $row, true);
 	}
 
 	/**
@@ -130,9 +133,28 @@ abstract class Model extends QueryBuilder {
 	 * @return QueryBuilder
 	 */
 	public static function findBy(...$args) {
-		$dbs = static::_getDatabaseSession($args);
-		$result = static::select($dbs)->where($args[0], '=', $args[1]);
+		$result = static::create(...$args)
+			->select()
+			->where($args[0], '=', $args[1]);
 		return $result;
+	}
+
+	public static function __callStatic($methodName, $args) {
+		switch($methodName) {
+			case 'select':
+				return parent::select(...$args)->from(static::TABLE_NAME);
+				break;
+		}
+		return parent::__callStatic($methodName, $args);
+	}
+
+	public function __call($methodName, $args) {
+		switch($methodName) {
+			case 'select':
+				return parent::__call($methodName, $args)->from(static::TABLE_NAME);
+				break;
+		}
+		return parent::__call($methodName, $args);
 	}
 
 	/**
@@ -140,10 +162,9 @@ abstract class Model extends QueryBuilder {
 	 * @param array ...$fields List of the selecting fields
 	 * @return QueryBuilder
 	 */
-	public static function select(...$fields) {
-		// error_log('testetstsetsetsetsetsete----------------- '.$fields[0]->_getDecoratedClassName());
-		return parent::select(...$fields)->from(static::TABLE_NAME);
-	}
+	// public static function select(...$fields) {
+	// 	return parent::select(...$fields)->from(static::TABLE_NAME);
+	// }
 
 	/**
 	 * Finishs the sql query, executes it and returns array of Model objects
@@ -153,7 +174,7 @@ abstract class Model extends QueryBuilder {
 		$result = array();
 		$rs = $this->exec();
 		while($row = $rs->fetch()) {
-			$result[] = new static($row, true);
+			$result[] = new static($this->getDatabaseSession(), $row, true);
 		}
 		return $result;
 	}
@@ -193,7 +214,7 @@ abstract class Model extends QueryBuilder {
 	 */
 	public function getFirst() {
 		$row = $this->exec()->fetch();
-		if($row) return new static($row, true);
+		if($row) return new static($this->getDatabaseSession(), $row, true);
 		return false;
 	}
 
