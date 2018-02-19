@@ -5,7 +5,7 @@ use \Exception;
 
 class Request {
 	public static function getMethod() {
-		return mb_strtolower($_SERVER['REQUEST_METHOD']);
+		return strtolower($_SERVER['REQUEST_METHOD']);
 	}
 
 	public static function isAjax() {
