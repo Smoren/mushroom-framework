@@ -98,7 +98,7 @@ abstract class Model extends QueryBuilder {
 		if(is_file(MUSHROOM_DIR_APP_MODELS.'/'.$fileName)) {
 			throw new Exception("file '$fileName' already exists");
 		}
-		$classString = "<?php\n\nclass $className extends Model {\n\tconst \$TABLE_NAME = '$tableName';\n\tprotected static \$fields = array('id');\n\n\tpublic static function validation() {\n\t\treturn array();\n\t}\n}";
+		$classString = "<?php\n\nclass $className extends Model {\n\tconst TABLE_NAME = '$tableName';\n\tprotected static \$fields = array('id');\n\n\tpublic static function validation() {\n\t\treturn array();\n\t}\n}";
 		file_put_contents(MUSHROOM_DIR_APP_MODELS.'/'.$fileName, $classString);
 		return $fileName;
 	}
