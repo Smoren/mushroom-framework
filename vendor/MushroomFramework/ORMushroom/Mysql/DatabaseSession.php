@@ -3,6 +3,7 @@
 namespace MushroomFramework\ORMushroom\Mysql;
 use MushroomFramework\ORMushroom\Base;
 use MushroomFramework\ORMushroom\Exceptions\QueryException;
+use \Exception;
 
 /**
  * Mysql DatabaseManager Class
