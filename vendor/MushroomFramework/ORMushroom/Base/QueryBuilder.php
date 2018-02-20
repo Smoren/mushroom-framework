@@ -366,17 +366,17 @@ class QueryBuilder {
 		$tableFor = $this->shieldColumn($tableFor);
 		$columnFor = $this->shieldColumn($columnFor);
 
-		$this->addToQuery("ADD FOREIGN KEY $columnName ($columnName)");
-		$this->addToQuery("REFERENCES $tableFor ($columnFor)");
+		$this->raw("ADD FOREIGN KEY $columnName ($columnName)");
+		$this->raw("REFERENCES $tableFor ($columnFor)");
 		
 		if($onDelete) {
 			$onDelete = $this->shield($onDelete);
-			$this->addToQuery("ON DELETE $onDelete");
+			$this->raw("ON DELETE $onDelete");
 		}
 		
 		if($onUpdate) {
 			$onUpdate = $this->shield($onUpdate);
-			$this->addToQuery("ON UPDATE $onUpdate");
+			$this->raw("ON UPDATE $onUpdate");
 		}
 
 		return $this;
