@@ -70,7 +70,7 @@ class View {
 	// подключает view
 	public function insert($path) {
 		$view = new static($path, $this->dir);
-		return $view->make($this->args);
+		return $view->make($this->args, $this->sections);
 	}
 
 	// начинает собирать буфер вывода для контента секции
