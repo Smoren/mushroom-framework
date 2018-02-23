@@ -308,6 +308,16 @@ class QueryBuilder {
 		return $this->order($by);
 	}
 
+	protected function group($by='id') {
+		$this->raw("GROUP BY");
+		$this->raw($this->shieldColumn($by));
+		return $this;
+	}
+
+	protected function groupBy($by='id') {
+		return $this->group($by);
+	}
+
 	protected function limit($num1, $num2=false) {
 		$this->raw("LIMIT ".intval($num1));
 		if(!($num2 === false)) {
