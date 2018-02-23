@@ -274,7 +274,7 @@ class QueryBuilder {
 	protected function join($tableName, $as=null) {
 		$this->raw("JOIN");
 		$this->raw($this->shieldColumn($tableName));
-		if($as) $this->raw($this->shield($as));
+		if($as && !intval($as)) $this->raw($this->shield($as));
 		
 		return $this;
 	}
