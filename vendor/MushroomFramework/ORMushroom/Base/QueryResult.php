@@ -52,4 +52,24 @@ abstract class QueryResult {
 	 * @return int
 	 */
 	abstract public function getErrorNo();
+
+	/**
+	 * Returns array of rows
+	 * @return array
+	 */
+	public function getList() {
+		$result = array();
+		while($row = $this->fetch()) {
+			$result[] = $row;
+		}
+		return $result;
+	}
+
+	/**
+	 * Returns array of rows
+	 * @return array
+	 */
+	public function list() {
+		return $this->getList();
+	}
 }
