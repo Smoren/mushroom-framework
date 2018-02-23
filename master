@@ -4,11 +4,18 @@
 use \MushroomFramework\ORMushroom\Migration;
 use \MushroomFramework\Main\App;
 
-require('core/init.php');
+if(is_dir('app')) {
+	include('core/init.php');
+} else {
+	echo "Warning: \"app\" directory does not exist!\nUse \"php master example install\"\n";
+}
 // App::gi()->init();
 // define('STDIN', fopen('php://stdin', 'r'));
 
 $commands = array(
+	'example' => array(
+		'install' => 'install example application',
+	),
 	'migrate' => array(
 		'install' => 'install migrations',
 		'make' => 'make migration',
@@ -48,6 +55,30 @@ if(!$command) {
 }
 
 // fclose(STDIN);
+
+class MasterExample {
+	public static function install() {
+		try {
+			$dirs = array('example', 'example/app', 'example/public');
+			foreach($dirs as $dir) {
+				if(!is_dir($dir)) {
+					throw new Exception('directory "'.$dir.'" not found!');
+				}
+			}
+			$dirsDest = array('app', 'public');
+			foreach($dirsDest as $dir) {
+				if(is_dir($dir)) {
+					throw new Exception('directory "'.$dir.'" already exists!');
+				}
+			}
+			exec("cp -r example/app .");
+			exec("cp -r example/public .");
+			echo "Installation complete!\n";
+		} catch(Exception $e) {
+			echo "Error: ".$e->getMessage()."\n";
+		}
+	}
+} 
 
 class MasterMigrate {
 	public static function install() {
