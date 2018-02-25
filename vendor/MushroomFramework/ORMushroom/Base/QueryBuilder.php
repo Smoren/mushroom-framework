@@ -392,6 +392,14 @@ class QueryBuilder {
 		return $this;
 	}
 
+	protected function dropForeignKey($columnName) {
+		$columnName = $this->shieldColumn($columnName);
+
+		$this->raw("DROP FOREIGN KEY $columnName");
+
+		return $this;
+	}
+
 	public function parseFilter($filterString='', array $filterFields=array(), array $filterOperators=array()) {
 		if(!strlen($filterString)) return $this;
 

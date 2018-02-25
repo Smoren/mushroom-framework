@@ -128,6 +128,16 @@ class Table {
 	}
 
 	/**
+	 * Drops foreign key
+	 * @param string $colName
+	 * @return $this
+	 */
+	public function dropForeignKey($colName) {
+		$this->alter()->dropForeignKey($colName)->exec();
+		return $this;
+	}
+
+	/**
 	 * Starts ALTER TABLE query
 	 * @return QueryBuilder
 	 */
