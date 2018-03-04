@@ -364,15 +364,10 @@ class QueryBuilder {
 		return $this;
 	}
 
-	protected function addUnique($columns) {
-		if(is_array($columns)) {
-			$constraintName = $this->shieldColumn(join('_', $columns));
-			foreach($columns as &$col) {
-				$col = $this->shieldColumn($col);
-			}
-		} else {
-			$constraintName = $this->shieldColumn($columns);
-			$columns = array($this->shieldColumn($columns));
+	protected function addUnique(...$columns) {
+		$constraintName = $this->shieldColumn(join('_', $columns));
+		foreach($columns as &$col) {
+			$col = $this->shieldColumn($col);
 		}
 		$this->raw("ADD UNIQUE $constraintName (".join(', ', $columns).")");
 		
