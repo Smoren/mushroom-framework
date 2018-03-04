@@ -364,9 +364,17 @@ class QueryBuilder {
 		return $this;
 	}
 
-	protected function addUnique() {
-		$columnName = $this->shieldColumn($columnName);
-		$this->raw("ADD UNIQUE $columnName ($columnName)");
+	protected function addUnique($columns) {
+		if(is_array($columns)) {
+			$constraintName = $this->shieldColumn(join('_', $columns));
+			foreach($columns as &$col) {
+				$col = $this->shieldColumn($col);
+			}
+		} else {
+			$constraintName = $this->shieldColumn($columns);
+			$columns = array($this->shieldColumn($columns));
+		}
+		$this->raw("ADD UNIQUE $columnName (".join(', ', $columns).")");
 		
 		return $this;
 	}
