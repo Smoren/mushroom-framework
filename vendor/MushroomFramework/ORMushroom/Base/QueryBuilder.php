@@ -374,7 +374,7 @@ class QueryBuilder {
 			$constraintName = $this->shieldColumn($columns);
 			$columns = array($this->shieldColumn($columns));
 		}
-		$this->raw("ADD UNIQUE $columnName (".join(', ', $columns).")");
+		$this->raw("ADD UNIQUE $constraintName (".join(', ', $columns).")");
 		
 		return $this;
 	}
