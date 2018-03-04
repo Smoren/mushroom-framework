@@ -108,8 +108,8 @@ class Table {
 	 * @param string $colName
 	 * @return $this
 	 */
-	public function addUnique($colName) {
-		$this->alter()->addUnique($colName)->exec();
+	public function addUnique(...$columns) {
+		$this->alter()->addUnique(...$columns)->exec();
 		return $this;
 	}
 
