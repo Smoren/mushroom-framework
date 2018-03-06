@@ -97,7 +97,7 @@ class Router {
 	}
 
 	// обрабатывает ошибки перед выполнением или передачей управления
-	public function handle($decorator, $controller, $actionName='', $data=array()) {
+	public function handle($decorator=false, $controller=false, $actionName='', $data=array()) {
 		try {
 			if(!$controller) {
 				throw new Exceptions\StatusException(404, "no route found");
