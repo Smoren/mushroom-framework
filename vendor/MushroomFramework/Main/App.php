@@ -4,8 +4,6 @@ namespace MushroomFramework\Main;
 use \MushroomFramework\Routing\Router;
 use \MushroomFramework\Pattern\Singleton;
 use \MushroomFramework\ORMushroom\DatabaseSession;
-// use \MushroomFramework\Database\DatabaseManager;
-// use \MushroomFramework\Database\QueryBuilder;
 use \MushroomFramework\InputOutput\Event;
 use \Exception;
 use \Error;
@@ -50,6 +48,7 @@ class App extends Singleton {
 			echo '<pre>'; print_r($e); echo '</pre>';
 			die();
 		} else {
+			error_log($e->getMessage());
 			// TODO: выводить стандартную страницу 500
 		}
 	}
