@@ -52,7 +52,7 @@ abstract class RestController extends Controller {
 		}
 	}
 
-	protected function list($params=array('filter' => array(), 'order' => array()), $filterFields=array(), $filterOperators=array(), $orderFields=array(), $maxListLimit=false) {
+	protected function list($params=array('filter' => '', 'order' => ''), $filterFields=array(), $filterOperators=array(), $orderFields=array(), $maxListLimit=false) {
 		$modelName = static::$modelName;
 
 		try {
