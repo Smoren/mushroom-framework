@@ -70,7 +70,7 @@ class DatabaseSession {
 		}
 	}
 
-	function __callStatic($methodName, array $args) {
+	public static function __callStatic($methodName, array $args) {
 		static::getDefaultSession()->$methodName();
 	}
 
