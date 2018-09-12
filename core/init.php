@@ -10,6 +10,7 @@ if(function_exists('session_start')) {
 // объявляем константы
 define('MUSHROOM_DIR_ROOT', dirname(__DIR__));
 define('MUSHROOM_DIR_LIB', MUSHROOM_DIR_ROOT.DIRECTORY_SEPARATOR.'vendor');
+define('MUSHROOM_DIR_MODULES', MUSHROOM_DIR_ROOT.DIRECTORY_SEPARATOR.'modules');
 define('MUSHROOM_DIR_CORE', MUSHROOM_DIR_ROOT.DIRECTORY_SEPARATOR.'core');
 define('MUSHROOM_DIR_PUBLIC', MUSHROOM_DIR_ROOT.DIRECTORY_SEPARATOR.'public');
 define('MUSHROOM_DIR_PUBLIC_UPLOAD', MUSHROOM_DIR_PUBLIC.DIRECTORY_SEPARATOR.'upload');
@@ -24,7 +25,7 @@ define('MUSHROOM_DIR_APP_MIGRATIONS', MUSHROOM_DIR_APP.DIRECTORY_SEPARATOR.'migr
 if(is_file(MUSHROOM_DIR_LIB.DIRECTORY_SEPARATOR.'autoload.php')) {
 	// подключаем autoloader от composer, если он есть
 	$loader = include_once(MUSHROOM_DIR_LIB.DIRECTORY_SEPARATOR.'autoload.php');
-	$loader->addPsr4('', array(MUSHROOM_DIR_LIB, MUSHROOM_DIR_APP_CONTROLLERS, MUSHROOM_DIR_APP_MODELS));
+	$loader->addPsr4('', array(MUSHROOM_DIR_LIB, MUSHROOM_DIR_APP_CONTROLLERS, MUSHROOM_DIR_APP_MODELS, MUSHROOM_DIR_MODULES));
 } else {
 	// подключаем autoloader
 	require_once(MUSHROOM_DIR_CORE.DIRECTORY_SEPARATOR.'autoloader.php');

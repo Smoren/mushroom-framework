@@ -42,6 +42,7 @@ class App extends Singleton {
 	}
 
 	public static function showError($e) {
+	    ob_end_clean();
 		http_response_code(500);
 		if(static::gi()->config['debug']) {
 			echo $e->getMessage();

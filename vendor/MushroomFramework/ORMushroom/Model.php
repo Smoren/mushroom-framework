@@ -162,9 +162,9 @@ abstract class Model extends QueryBuilder {
 	 * @param array ...$fields List of the selecting fields
 	 * @return QueryBuilder
 	 */
-	// public static function select(...$fields) {
-	// 	return parent::select(...$fields)->from(static::TABLE_NAME);
-	// }
+	 //public static function select(...$fields) {
+	 //    return parent::select(...$fields)->from(static::TABLE_NAME);
+	 //}
 
 	/**
 	 * Finishs the sql query, executes it and returns array of Model objects

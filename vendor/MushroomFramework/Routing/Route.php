@@ -88,7 +88,9 @@ class Route {
 				if(!($decorator instanceof ControllerDecorator)) {
 					throw new \Exception("Wrong ControllerDecorator {$decoratorClassName}");
 				}
-			}
+			} else {
+                throw new \Exception("Wrong ControllerDecorator {$decoratorClassName} (class not exists)");
+            }
 		} else {
 			$decorator = new ControllerDecorator($controller);
 		}

@@ -7,10 +7,14 @@ class Uri {
 	protected $paramsAdded = false;
 
 	public static function make($addr, ...$data) {
-		if(!$data) $data = array();
+		if(empty($data)) $data = array();
 		elseif(is_array($data[0])) $data = $data[0];
-		$route = Router::findRoute($addr, sizeof($data));
-		return new static($route->getUri($data));
+//		try {
+            $route = Router::findRoute($addr, sizeof($data));
+//        } catch(\Throwable $e) {
+//		    return $e->getMessage();
+//        }
+        return new static($route->getUri($data));
 	}
 
 	function __construct($uri) {

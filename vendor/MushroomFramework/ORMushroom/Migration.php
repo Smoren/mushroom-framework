@@ -3,6 +3,7 @@
 namespace MushroomFramework\ORMushroom;
 use \Exception;
 
+// TODO: migration from module
 /**
  * Migration Class
  * @version 0.1.0
