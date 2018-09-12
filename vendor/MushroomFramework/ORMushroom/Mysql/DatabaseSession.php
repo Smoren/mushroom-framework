@@ -11,6 +11,8 @@ use \Exception;
  * @author Smoren <ofigate@gmail.com>
  */
 class DatabaseSession extends Base\DatabaseSession {
+	protected $transactionStarted = false;
+
 	public function __construct($dbConfig) {
 		$this->type = $dbConfig['type'];
 		$this->host = $dbConfig['host'];
@@ -66,6 +68,43 @@ class DatabaseSession extends Base\DatabaseSession {
 		$tableName = addslashes($tableName);
 		if($this->query("SHOW TABLES LIKE '$tableName'")->fetch()) return true;
 		return false;
+	}
+
+	/**
+	 * Starts new transaction
+	 */
+	public function transactionStart() {
+		if($this->transactionStarted) {
+			throw new Exception('transaction is already started');
+		}
+
+		$this->query("set autocommit=0");
+		$this->query("start transaction");
+		$this->transactionStarted = true;
+	}
+
+	/**
+	 * Commits transaction
+	 */
+	public function transactionCommit() {
+		if(!$this->transactionStarted) {
+			throw new Exception('transaction is not started');
+		}
+
+		$this->query("commit");
+		$this->transactionStarted = false;
+	}
+
+	/**
+	 * Rollbacks transaction
+	 */
+	public function transactionRollback() {
+		if(!$this->transactionStarted) {
+			throw new Exception('transaction is not started');
+		}
+
+		$this->query("rollback");
+		$this->transactionStarted = false;
 	}
 
 	public function close() {

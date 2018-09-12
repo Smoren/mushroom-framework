@@ -70,6 +70,10 @@ class DatabaseSession {
 		}
 	}
 
+	function __callStatic($methodName, array $args) {
+		static::getDefaultSession()->$methodName();
+	}
+
 	protected function init($obj) {
 		$this->obj = $obj;
 		return $this->obj;

@@ -65,6 +65,21 @@ abstract class DatabaseSession {
 	abstract public function tableExists($tableName);
 
 	/**
+	 * Starts new transaction
+	 */
+	abstract public function transactionStart();
+
+	/**
+	 * Commits transaction
+	 */
+	abstract public function transactionCommit();
+
+	/**
+	 * Rollbacks transaction
+	 */
+	abstract public function transactionRollback();
+
+	/**
 	 * Closes opened connection to database
 	 * @return void
 	 */
