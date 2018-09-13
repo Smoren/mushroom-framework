@@ -2,6 +2,10 @@
 
 namespace MushroomFramework\View;
 
+/**
+ * Class Form
+ * @package MushroomFramework\View
+ */
 class Form {
 	public static function start($action, $method, $enctype, $attrs) {
 		$attrs['action'] = $action;
@@ -14,7 +18,7 @@ class Form {
 		return "</form>";
 	}
 
-	public static function submit($name='', $value='', $attrs='') {
+	public static function submit($name='', $value='', $attrs=null) {
 		if(!is_array($attrs)) $attrs = array();
 		$attrs['type'] = 'submit';
 		$attrs['name'] = $name;
@@ -23,7 +27,7 @@ class Form {
 		return $res;
 	}
 
-	public static function button($name='', $value='', $attrs='') {
+	public static function button($name='', $value='', $attrs=null) {
 		if(!is_array($attrs)) $attrs = array();
 		// $attrs['type'] = 'submit';
 		$attrs['name'] = $name;
@@ -31,7 +35,7 @@ class Form {
 		return $res;
 	}
 
-	public static function checkbox($name='', $value='', $attrs='', $title='') {
+	public static function checkbox($name='', $value='', $attrs=null, $title='') {
 		if(!is_array($attrs)) $attrs = array();
 		$res = "";
 		$value = $value ? $value : 'On';
@@ -61,7 +65,7 @@ class Form {
 		return $res;
 	}
 
-	public static function radio($name='', $value='', $attrs='', $title='') {
+	public static function radio($name='', $value='', $attrs=null, $title='') {
 		if(!is_array($attrs)) $attrs = array();
 		$res = "";
 		if(!(($val = static::getValueFromRequest($name)) === false)) {
@@ -86,7 +90,7 @@ class Form {
 		return $res;
 	}
 
-	public static function select($name='', $value='', $items='', $attrs='') {
+	public static function select($name='', $value='', $items=null, $attrs=null) {
 		if(!is_array($attrs)) $attrs = array();
 		if($value === false) {
 			$value = '';
@@ -106,7 +110,7 @@ class Form {
 		return $res;
 	}
 
-	public static function text($name='', $value='', $attrs='') {
+	public static function text($name='', $value='', $attrs=null) {
 		if(!is_array($attrs)) $attrs = array();
 		if($value === false) {
 			$value = '';
@@ -120,31 +124,31 @@ class Form {
 		return $res;
 	}
 
-	public static function number($name='', $value='', $attrs='') {
+	public static function number($name='', $value='', $attrs=null) {
 		if(!is_array($attrs)) $attrs = array();
 		$attrs['type'] = 'number';
 		return static::text($name, $value, $attrs);
 	}
 
-	public static function password($name='', $value='', $attrs='') {
+	public static function password($name='', $value='', $attrs=null) {
 		if(!is_array($attrs)) $attrs = array();
 		$attrs['type'] = 'password';
 		return static::text($name, $value, $attrs);
 	}
 
-	public static function hidden($name='', $value='', $attrs='') {
+	public static function hidden($name='', $value='', $attrs=null) {
 		if(!is_array($attrs)) $attrs = array();
 		$attrs['type'] = 'hidden';
 		return static::text($name, $value, $attrs);
 	}
 
-	public static function file($name='', $attrs='') {
+	public static function file($name='', $attrs=null) {
 		if(!is_array($attrs)) $attrs = array();
 		$attrs['type'] = 'file';
 		return static::text($name, $value, $attrs);
 	}
 
-	public static function textarea($name='', $value='', $attrs='') {
+	public static function textarea($name='', $value='', $attrs=null) {
 		if(!is_array($attrs)) $attrs = array();
 		if($val === false) {
 			$val = '';
@@ -158,7 +162,7 @@ class Form {
 		return $res;
 	}
 
-	public static function tinymce($name='', $value='', $attrs='') {
+	public static function tinymce($name='', $value='', $attrs=null) {
 		if(!is_array($attrs)) $attrs = array();
 		$className = 'tinymce-'.rand(100000, 999999);
 		if(!is_array($attrs)) {

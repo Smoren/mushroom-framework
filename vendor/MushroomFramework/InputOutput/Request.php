@@ -3,6 +3,10 @@
 namespace MushroomFramework\InputOutput;
 use \Exception;
 
+/**
+ * Class Request
+ * @package MushroomFramework\InputOutput
+ */
 class Request {
 	public static function getMethod() {
 		return strtolower($_SERVER['REQUEST_METHOD']);

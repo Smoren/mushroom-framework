@@ -4,6 +4,19 @@ namespace MushroomFramework\Facades;
 use \MushroomFramework\Pattern\Facade;
 use \MushroomFramework\View\View;
 
+/**
+ * Class Response
+ * @package MushroomFramework\Facades
+ * @method status($statusCode) static
+ * @method error($statusCode, $message='') static
+ * @method mimeType($type=null) static
+ * @method attachmentName($name) static
+ * @method addData($name, $val) static
+ * @method text($str) static
+ * @method json($data) static
+ * @method file() static
+ * @method genFile($str, $name, $ext=null) static
+ */
 class Response extends Facade {
 	protected static $locClassName = '\\MushroomFramework\\InputOutput\\Response';
 

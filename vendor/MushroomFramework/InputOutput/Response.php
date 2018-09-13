@@ -4,6 +4,10 @@ namespace MushroomFramework\InputOutput;
 use \Exception;
 use \Closure;
 
+/**
+ * Class Response
+ * @package MushroomFramework\InputOutput
+ */
 class Response {
 	protected static $globalData = array();
 	protected $callback;

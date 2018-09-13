@@ -2,6 +2,10 @@
 
 namespace MushroomFramework\View;
 
+/**
+ * Class Html
+ * @package MushroomFramework\View
+ */
 class Html {
 	public static function link($addr, $name, $htmlAttrs=false) {
 		if(!is_array($htmlAttrs)) $htmlAttrs = array();

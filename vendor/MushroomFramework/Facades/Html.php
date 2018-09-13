@@ -3,6 +3,12 @@
 namespace MushroomFramework\Facades;
 use \MushroomFramework\Pattern\Facade;
 
+/**
+ * Class Html
+ * @package MushroomFramework\Facades
+ * @method tag($tagName, $innerHtml, $attrs=false) static
+ * @method table($thead, $tbody, $tfoot, $attrs=false) static
+ */
 class Html extends Facade {
 	protected static $locClassName = '\\MushroomFramework\\View\\Html';
 

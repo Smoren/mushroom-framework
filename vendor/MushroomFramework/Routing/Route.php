@@ -3,6 +3,11 @@
 namespace MushroomFramework\Routing;
 
 // класс маршрута
+
+/**
+ * Class Route
+ * @package MushroomFramework\Routing
+ */
 class Route {
 	protected static $patterns; // понадобится в дальнейшем (как в Laravel)
 	protected $mask; // маска URI

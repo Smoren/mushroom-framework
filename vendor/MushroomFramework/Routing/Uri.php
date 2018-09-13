@@ -2,6 +2,10 @@
 
 namespace MushroomFramework\Routing;
 
+/**
+ * Class Uri
+ * @package MushroomFramework\Routing
+ */
 class Uri {
 	protected $uri;
 	protected $paramsAdded = false;

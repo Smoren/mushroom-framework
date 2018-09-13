@@ -3,6 +3,11 @@
 namespace MushroomFramework\Routing;
 
 // принимает запросы, собирает данные и осуществляет маршрутизацию
+
+/**
+ * Class Router
+ * @package MushroomFramework\Routing
+ */
 class Router {
 	protected static $instance;
 	protected static $routes = array();
@@ -50,6 +55,10 @@ class Router {
 		}
 	}
 
+    public static function throwStatusException($code, $message) {
+        throw new Exceptions\StatusException($code, $message);
+    }
+
 	function __construct($uri=false, $method=false) {
 		// парсим URI
 		if(!$uri) $uri = $_SERVER['REQUEST_URI'];
@@ -62,7 +71,23 @@ class Router {
 		if(!static::$instance) static::$instance = $this;
 	}
 
-	// возвращает маршрут обработки ошибки по ее имени (Exception)
+    // передача управления
+    public function transfer($where, $data=array(), $decorator=null) {
+        // TODO переделать через поиск и запуск Route::go
+        foreach(static::$routes as &$route) {
+            if($route->getAddr() == $where) {
+                return $route->go($this);
+            }
+        }
+        foreach(static::$errors as &$route) {
+            if($route->getAddr() == $where) {
+                return $route->go($this);
+            }
+        }
+        throw new Exceptions\RouteException("Transfer error for {$where}");
+    }
+
+    // возвращает маршрут обработки ошибки по ее имени (Exception)
 	public function getError($code=404) {
 		if(isset(static::$errors[$code])) {
 			return static::$errors[$code];
@@ -128,26 +153,6 @@ class Router {
 		}
 	}
 	
-	// передача управления
-	public function transfer($where, $data=array(), $decorator=null) {
-		// TODO переделать через поиск и запуск Route::go
-		foreach(static::$routes as &$route) {
-			if($route->getAddr() == $where) {
-				return $route->go($this);
-			}
-		}
-		foreach(static::$errors as &$route) {
-			if($route->getAddr() == $where) {
-				return $route->go($this);
-			}
-		}
-		throw new Exceptions\RouteException("Transfer error for {$where}");
-	}
-
-	public static function throwStatusException($code, $message) {
-		throw new Exceptions\StatusException($code, $message);
-	}
-
 	// парсит URI
 	protected function parseUri($uri) {
 		$arUri = explode('?', $uri);

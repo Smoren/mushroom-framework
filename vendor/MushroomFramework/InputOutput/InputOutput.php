@@ -4,6 +4,10 @@ namespace MushroomFramework\InputOutput;
 use \MushroomFramework\Pattern\Singleton;
 use \Exception;
 
+/**
+ * Class InputOutput
+ * @package MushroomFramework\InputOutput
+ */
 abstract class InputOutput extends Singleton {
 	protected static $source;
 	protected static $instance;

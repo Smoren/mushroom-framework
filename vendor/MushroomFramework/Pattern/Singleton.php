@@ -3,9 +3,9 @@
 namespace MushroomFramework\Pattern;
 
 class Singleton {
-	private static $instance;
+	protected static $instance;
 
-	private function __construct() {
+    protected function __construct() {
 
 	}
 

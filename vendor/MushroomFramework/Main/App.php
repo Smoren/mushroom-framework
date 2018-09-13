@@ -10,7 +10,6 @@ use \Error;
 use \Closure;
 
 class App extends Singleton {
-	public static $instance;
 	protected $database;
 	protected $router;
 	protected $config;
@@ -119,4 +118,16 @@ class App extends Singleton {
 		}
 		return $this->properties[$name];
 	}
+
+	public function initModules() {
+        $dh = opendir(MUSHROOM_DIR_APP_MODULES);
+        while($fname = readdir($dh)) {
+            $filePath = MUSHROOM_DIR_APP_MODULES . DIRECTORY_SEPARATOR . $fname;
+            $initFilePath = $filePath . DIRECTORY_SEPARATOR . 'init.php';
+            if (is_dir($filePath) && is_file($initFilePath)) {
+                include_once($initFilePath);
+            }
+        }
+    }
+
 }
